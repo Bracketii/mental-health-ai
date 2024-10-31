@@ -1,3 +1,5 @@
+<!-- resources/views/welcome.blade.php -->
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
@@ -13,6 +15,7 @@
 
     <!-- Styles -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
     <!-- Remove overflow hidden to allow scrolling -->
     <style>
         html, body {
@@ -33,16 +36,16 @@
         <!-- Hero Section -->
         <div class="flex flex-col lg:flex-row flex-grow lg:h-[680px]">
             <!-- Left Column -->
-            <div class="w-full lg:w-1/2 bg-gray-900 text-white flex flex-col p-8">
+            <div class="lg:w-1/2 bg-gray-900 text-white flex flex-col p-8">
                 <!-- Content Container -->
-                <div class="max-w-lg mx-auto flex flex-col pr-5">
+                <div class="container-sm mx-auto flex flex-col pr-5">
                     <!-- Logo -->
                     <h1 class="text-4xl font-normal mb-6">Run On Empathy</h1>
 
                     <!-- Main Content -->
-                    <div class="mt-24">
+                    <div class="mt-24 pr-44">
                         <!-- Heading -->
-                        <h2 class="text-5xl font-semibold mb-4">
+                        <h2 class="text-5xl font-semibold mb-4 leading-snug">
                             Create your own Mental Health<br>
                             <span class="bg-gradient-to-r from-indigo-400 to-white bg-clip-text text-transparent">AI Coach</span>
                         </h2>
@@ -56,17 +59,7 @@
                         <p class="mb-4">Start by selecting how you identify:</p>
 
                         <!-- Gender Selection Buttons -->
-                        <div class="flex flex-wrap gap-4">
-                            <button class="w-full sm:w-auto flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 transition text-white">
-                                Female
-                            </button>
-                            <button class="w-full sm:w-auto flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 transition text-white">
-                                Male
-                            </button>
-                            <button class="w-full sm:w-auto flex-1 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 transition text-white">
-                                Non-Binary
-                            </button>
-                        </div>
+                        @livewire('gender-selection-buttons')
                     </div>
                 </div>
             </div>
@@ -83,8 +76,8 @@
         </div>
 
         <!-- Footer -->
-        <footer class="bg-white py-4 shadow-inner">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
+        <footer class="bg-white py-4 shadow-inner container mx-auto">
+            <div class="px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
                 <!-- App Name and Rights -->
                 <div class="text-gray-600 text-center md:text-left">
                     <span class="font-semibold">Run On Empathy</span> &copy; {{ date('Y') }} All rights reserved.
@@ -92,7 +85,7 @@
 
                 <!-- Navigation Links -->
                 <div class="flex flex-wrap justify-center md:justify-end mt-4 md:mt-0 space-x-6">
-                    <a href="#" class="text-gray-600 hover:text-gray-800">Login</a>
+                    <a href="/login" wire:navigate class="text-gray-600 hover:text-gray-800">Login</a>
                     <a href="#" class="text-gray-600 hover:text-gray-800">Terms</a>
                     <a href="#" class="text-gray-600 hover:text-gray-800">Privacy</a>
                     <a href="#" class="text-gray-600 hover:text-gray-800">Contact</a>
@@ -101,5 +94,6 @@
         </footer>
     </div>
 
+    @livewireScripts
 </body>
 </html>

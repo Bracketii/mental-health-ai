@@ -9,21 +9,37 @@
         <form method="POST" action="{{ route('register') }}">
             @csrf
 
+            <!-- Name -->
             <div>
                 <x-label for="name" value="{{ __('Name') }}" />
                 <x-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')" required autofocus autocomplete="name" />
             </div>
 
+            <!-- Email -->
             <div class="mt-4">
                 <x-label for="email" value="{{ __('Email') }}" />
                 <x-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autocomplete="username" />
             </div>
 
+            <!-- Gender Selection -->
+            <div class="mt-4">
+                <x-label for="gender" value="{{ __('Gender') }}" />
+                <select id="gender" name="gender" required class="block mt-1 w-full border-gray-300 rounded-md shadow-sm text-sm">
+                    <option value="" disabled selected>Select your gender</option>
+                    <option value="female" {{ Session::get('gender') == 'female' ? 'selected' : '' }}>Female</option>
+                    <option value="male" {{ Session::get('gender') == 'male' ? 'selected' : '' }}>Male</option>
+                    <option value="non_binary" {{ Session::get('gender') == 'non_binary' ? 'selected' : '' }}>Non-Binary</option>
+                </select>
+                @error('gender') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+            </div>
+
+            <!-- Password -->
             <div class="mt-4">
                 <x-label for="password" value="{{ __('Password') }}" />
                 <x-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
             </div>
 
+            <!-- Confirm Password -->
             <div class="mt-4">
                 <x-label for="password_confirmation" value="{{ __('Confirm Password') }}" />
                 <x-input id="password_confirmation" class="block mt-1 w-full" type="password" name="password_confirmation" required autocomplete="new-password" />

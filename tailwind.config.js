@@ -14,10 +14,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                // sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                sans: ['Kanit', ...defaultTheme.fontFamily.sans],
-                kanit: ['Kanit', 'sans-serif'],
-                satisfy: ['Satisfy', 'cursive'],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
         },
     },
