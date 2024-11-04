@@ -6,13 +6,10 @@ export default defineConfig({
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
             refresh: true,
-            buildDirectory: 'public/build', // Ensure build is in public/build
         }),
     ],
-    resolve: {
-        alias: {
-            '@': '/resources',
-        },
+    build: {
+        outDir: 'public/build', // Ensure output is in public/build
+        manifest: true, // Ensure manifest.json is created
     },
 });
-
