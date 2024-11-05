@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -23,5 +24,9 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('markdown', function ($expression) {
             return "<?php echo (new Parsedown)->text($expression); ?>";
         });
+        
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }
