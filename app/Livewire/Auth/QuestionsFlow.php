@@ -36,9 +36,39 @@ class QuestionsFlow extends Component
             // After answering all questions, store the selected options in session
             Session::put('selectedOptions', $this->selectedOptions);
 
-            // Redirect to the registration page
-            return redirect()->route('register');
+            // Redirect to the coach generated page
+            return redirect()->route('coach.generated');
         }
+    }
+
+    public function previousQuestion()
+    {
+        if ($this->currentQuestionIndex > 0) {
+            $this->currentQuestionIndex--;
+        }
+    }
+
+    public function nextQuestion()
+    {
+        if ($this->currentQuestionIndex < count($this->questions) - 1) {
+            $this->currentQuestionIndex++;
+        }
+    }
+
+    public function finishQuestionnaire()
+    {
+        // Ensure the current question is answered
+        $question = $this->questions[$this->currentQuestionIndex];
+        if (!isset($this->selectedOptions[$question->id])) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Please answer the current question before finishing.']);
+            return;
+        }
+
+        // Store the selected options in session
+        Session::put('selectedOptions', $this->selectedOptions);
+
+        // Redirect to the coach generated page
+        return redirect()->route('coach.generated');
     }
 
     public function render()
