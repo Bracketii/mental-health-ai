@@ -26,9 +26,9 @@
         <h2 class="mb-6 text-2xl text-center">{{ $questions[$currentQuestionIndex]->text }}</h2>
         <div class="flex flex-col space-y-4">
             @foreach ($questions[$currentQuestionIndex]->options as $option)
-                <button wire:click="answerQuestion({{ $option->id }})" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-left">
+                <x-secondary-button wire:click="answerQuestion({{ $option->id }})" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition text-left">
                     {{ $option->text }}
-                </button>
+                </x-secondary-button>
             @endforeach
         </div>
         <div class="mt-6 text-center text-gray-500">
@@ -36,24 +36,24 @@
         </div>
     </div>
 
-    <!-- Navigation Buttons -->
+    <!-- Navigation x-buttons -->
     <div class="flex justify-between mt-4">
         @if ($currentQuestionIndex > 0)
-            <button wire:click="previousQuestion" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            <x-button wire:click="previousQuestion" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
                 Previous
-            </button>
+            </x-button>
         @else
             <div></div>
         @endif
 
         @if ($currentQuestionIndex < count($questions) - 1)
-            <button wire:click="nextQuestion" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <x-button wire:click="nextQuestion" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                 Next
-            </button>
+            </x-button>
         @else
-            <button wire:click="finishQuestionnaire" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+            <x-button wire:click="finishQuestionnaire" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-800 transition">
                 Finish
-            </button>
+            </x-button>
         @endif
     </div>
 </x-authentication-card>

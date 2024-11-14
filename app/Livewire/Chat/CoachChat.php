@@ -22,11 +22,11 @@ class CoachChat extends Component
 {
     public $messages = [];
     public $inputMessage = '';
-    public $coachType = 'mental_health'; // Default coach type
+    private $coachType = 'mental_health'; // Fixed coach type
 
     public function mount()
     {
-        // Initialize with a welcome message from the assistant based on coach type
+        // Initialize with a welcome message from the Mental Health Coach
         $this->messages[] = [
             'role' => 'assistant',
             'content' => $this->getWelcomeMessage(),
@@ -65,14 +65,7 @@ class CoachChat extends Component
 
     private function getWelcomeMessage()
     {
-        $welcomeMessages = [
-            'mental_health' => 'Hello! I\'m Run On Empathy, your Mental Health Coach. How can I assist you today?',
-            'career' => 'Hello! I\'m Run On Empathy, your Career Coach. How can I help you with your career goals?',
-            'wellness' => 'Hello! I\'m Run On Empathy, your Wellness Coach. How can I support your well-being today?',
-            // Add more welcome messages for different coaches
-        ];
-
-        return $welcomeMessages[$this->coachType] ?? 'Hello! How can I assist you today?';
+        return 'Hello! I\'m Run On Empathy, your Mental Health Coach. How can I assist you today?';
     }
 
     private function chatWithAI($input)
@@ -81,37 +74,22 @@ class CoachChat extends Component
         $config = new OpenAIConfig();
         $config->apiKey = $openaiService['api_key'];
     
-        // Define model based on coach type if needed
-        $modelMap = [
-            'mental_health' => 'gpt-4o-mini',
-            'career' => 'gpt-4o-mini',
-            'wellness' => 'gpt-4o-mini',
-            // Map more coach types to specific models if desired
-        ];
-        $config->model = $modelMap[$this->coachType] ?? 'gpt-4o-mini';
+        // Define model for Mental Health Coach
+        $config->model = 'gpt-4o-mini';
     
         $config->modelOptions = [
-            'presence_penalty' => 0.6, // Increased to encourage new topics
-            'frequency_penalty' => 0.3, // Increased to reduce repetition
-            'max_tokens' => 200, // Limit AI response to 200 tokens
+            'presence_penalty' => 0.6, // Encourage new topics
+            'frequency_penalty' => 0.3, // Reduce repetition
         ];
         
-    
         $chat = new OpenAIChat($config);
     
         $vectorStore = new FileSystemVectorStore();
         $embeddingGenerator = new OpenAIADA002EmbeddingGenerator();
     
         if ($vectorStore->getNumberOfDocuments() === 0) {
-            // Load context from a file based on coach type
-            $contextFileMap = [
-                'mental_health' => base_path('app/Http/Controllers/mental_health_context.txt'),
-                'career' => base_path('app/Http/Controllers/career_context.txt'),
-                'wellness' => base_path('app/Http/Controllers/wellness_context.txt'),
-                // Add more context files for different coaches
-            ];
-    
-            $contextFile = $contextFileMap[$this->coachType] ?? base_path('app/Http/Controllers/context.txt');
+            // Load context from the Mental Health context file
+            $contextFile = base_path('app/Http/mental_health_context.txt');
     
             $dataReader = new FileDataReader($contextFile);
             $documents = $dataReader->getDocuments();
@@ -125,15 +103,8 @@ class CoachChat extends Component
         // Retrieve user-specific answers to build context
         $userContext = $this->getUserContext();
     
-        // Customize system message based on coach type
-        $customSystemMessages = [
-            'mental_health' => 'You name is Run On Empathy, a compassionate Mental Health Coach dedicated to supporting the Black community. Engage in friendly, empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity.',
-            'career' => 'You name is Run On Empathy, a knowledgeable Career Coach committed to helping individuals in the Black community achieve their professional goals. Interact in a conversational and encouraging manner, offering insightful advice and practical guidance tailored to each user\'s career aspirations. Use bullet points or numbered lists to organize your responses when appropriate.',
-            'wellness' => 'You name is Run On Empathy, a dedicated Wellness Coach focused on promoting holistic well-being within the Black community. Communicate in a friendly and conversational tone, providing guidance on physical health, nutrition, and maintaining a balanced lifestyle in an approachable manner. Structure your responses with bullet points or numbered lists to enhance readability.',
-            // Add more system messages for different coaches as needed
-        ];
-    
-        $customSystemMessage = $customSystemMessages[$this->coachType] ?? 'You are an AI assistant. Engage in friendly and conversational dialogue to help users with their needs. Structure your responses using bullet points or numbered lists where appropriate.';
+        // Customize system message for Mental Health Coach
+        $customSystemMessage = 'Your name is Run On Empathy, a compassionate Mental Health Coach. Always give short answers. Your goal is to provide empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, short answers and suggestions and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity. \n\n{userContext}.';
     
         $qa = new QuestionAnswering($vectorStore, $embeddingGenerator, $chat);
         $qa->systemMessageTemplate = $customSystemMessage;

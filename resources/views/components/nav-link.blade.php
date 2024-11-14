@@ -1,11 +1,13 @@
-@props(['active'])
+<!-- resources/views/components/nav-link.blade.php -->
+
+@props(['href', 'active' => false])
 
 @php
-$classes = ($active ?? false)
-            ? 'inline-flex items-center px-1 pt-1 border-b-2 border-indigo-400 text-sm font-medium leading-5 text-gray-900 focus:outline-none focus:border-indigo-700 transition duration-150 ease-in-out'
-            : 'inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium leading-5 text-gray-500 hover:text-gray-700 hover:border-gray-300 focus:outline-none focus:text-gray-700 focus:border-gray-300 transition duration-150 ease-in-out';
+    $classes = ($active)
+                ? 'flex items-center p-2 text-base text-blue-600 bg-blue-50 rounded-lg dark:bg-neutral-700 dark:text-blue-400'
+                : 'flex items-center p-2 text-base text-gray-700  hover:bg-gray-50 rounded-lg dark:text-neutral-300 dark:hover:bg-neutral-700 dark:hover:text-blue-400';
 @endphp
 
-<a {{ $attributes->merge(['class' => $classes]) }}>
+<a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }}>
     {{ $slot }}
 </a>

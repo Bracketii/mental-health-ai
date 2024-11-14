@@ -1,6 +1,7 @@
 <?php
 
 use App\Livewire\Checkout;
+use App\Livewire\Admin\Dashboard;
 use App\Livewire\Auth\PasswordSetup;
 use App\Livewire\Auth\QuestionsFlow;
 use App\Livewire\Auth\CoachGenerated;
@@ -35,3 +36,6 @@ Route::get('/stripe/cancel', [StripeCheckoutController::class, 'cancel'])->name(
 
 Route::get('/password-setup', PasswordSetup::class)->name('password.setup');
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
+
+
+Route::get('admin/dashboard', Dashboard::class)->name('admin.dashboard');

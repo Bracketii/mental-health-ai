@@ -1,29 +1,19 @@
 <!-- resources/views/livewire/chat/coach-chat.blade.php -->
 
 <div class="flex flex-col h-full">
-    <!-- Coach Selection -->
-    <div class="mb-4 flex justify-end mt-2 mr-2">
-        <select wire:model="coachType" class="border border-gray-300 dark:border-gray-700 rounded-md p-2 pr-7 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white">
-            <option value="mental_health">Mental Health</option>
-            <option value="career">Career</option>
-            <option value="wellness">Wellness</option>
-            <!-- Add more coach types as needed -->
-        </select>
-    </div>
-
     <!-- Chat Messages -->
-    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
         @foreach($messages as $message)
             @if($message['role'] === 'assistant')
                 <div class="flex">
                     <img src="{{ asset('images/assistant-avatar.jpg') }}" alt="Assistant" class="h-10 w-10 rounded-full">
-                    <div class="ml-3 bg-gray-200 dark:bg-gray-700 rounded-lg p-4">
+                    <div class="ml-3 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2 max-w-xl break-words">
                         @markdown($message['content'])
                     </div>
                 </div>
             @else
                 <div class="flex justify-end">
-                    <div class="mr-3 bg-blue-600 text-white rounded-lg p-4">
+                    <div class="mr-3 bg-blue-600 text-white rounded-lg px-4 py-2 max-w-xl break-words">
                         <p>{{ $message['content'] }}</p>
                     </div>
                     <img src="{{ asset('images/user-avatar.jpg') }}" alt="User" class="h-10 w-10 rounded-full">
@@ -43,12 +33,34 @@
     <!-- Chat Input -->
     <div class="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
         <div class="flex items-center">
-            <textarea wire:model.defer="inputMessage" wire:keydown.enter.prevent="sendMessage" class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white" rows="1" placeholder="Type your message..."></textarea>
-            <button wire:click="sendMessage" class="ml-2 bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-500 focus:outline-none">
-                <span>
-                    <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="m2.6 13.083 3.452 1.511L16 9.167l-6 7 8.6 3.916a1 1 0 0 0 1.399-.85l1-15a1.002 1.002 0 0 0-1.424-.972l-17 8a1.002 1.002 0 0 0 .025 1.822zM8 22.167l4.776-2.316L8 17.623z"></path></svg>
-                </span> 
-            </button>
+            <x-input
+                wire:model.defer="inputMessage"
+                wire:keydown.enter.prevent="sendMessage"
+                type="text"
+                placeholder="Type your message..."
+                class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+            />
+            <x-button wire:click="sendMessage" class="ml-2 bg-blue-600 hover:bg-blue-500">
+                <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path d="M2.6 13.083L3.452 14.594L16 9.167L10 16L18.6 19.916a1 1 0 0 0 1.399-.85L21 4.917a1.002 1.002 0 0 0-1.424-.972L3.001 12.95a1.002 1.002 0 0 0 .025 1.822zM8 22.167L12.776 19.851L8 17.623z"></path>
+                </svg>
+            </x-button>
         </div>
+
+        <!-- Validation Errors -->
+        <x-validation-errors class="mt-2" />
     </div>
+
+    @push('scripts')
+        <script>
+            document.addEventListener('livewire:load', function () {
+                Livewire.hook('message.processed', (message, component) => {
+                    const chatMessages = document.getElementById('chat-messages');
+                    if (chatMessages) {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+                });
+            });
+        </script>
+    @endpush
 </div>

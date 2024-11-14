@@ -21,7 +21,7 @@
         </div>
 
         <div class="flex justify-center">
-            <x-button>
+            <x-button fullWidth>
                 Submit Email
             </x-button>
         </div>
