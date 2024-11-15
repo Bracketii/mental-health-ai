@@ -15,7 +15,7 @@
     <!-- Progress Indicator -->
     <div class="mb-4">
         <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ (($currentQuestionIndex + 1) / count($questions)) * 100 }}%"></div>
+            <div class="bg-ap4 h-2.5 rounded-full" style="width: {{ (($currentQuestionIndex + 1) / count($questions)) * 100 }}%"></div>
         </div>
         <p class="text-sm text-gray-600 mt-1">{{ ($currentQuestionIndex + 1) }} of {{ count($questions) }} questions answered</p>
     </div>
@@ -39,7 +39,7 @@
     <!-- Navigation x-buttons -->
     <div class="flex justify-between mt-4">
         @if ($currentQuestionIndex > 0)
-            <x-button wire:click="previousQuestion" class="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300 transition">
+            <x-button wire:click="previousQuestion" class="px-4 py-2 bg-ap4 rounded-lg hover:bg-ap5 transition">
                 Previous
             </x-button>
         @else
@@ -47,7 +47,7 @@
         @endif
 
         @if ($currentQuestionIndex < count($questions) - 1)
-            <x-button wire:click="nextQuestion" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <x-button wire:click="nextQuestion" class="px-4 py-2 bg-ap4 text-white rounded-lg hover:bg-ap5 transition">
                 Next
             </x-button>
         @else

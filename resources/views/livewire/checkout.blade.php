@@ -24,7 +24,7 @@
                     <p class="text-sm text-gray-500">per day</p>
                 </div>
                 <div class="text-center md:text-right">
-                    <x-button wire:click="selectPlan('{{ $key }}')" class="bg-blue-600 hover:bg-blue-700">
+                    <x-button wire:click="selectPlan('{{ $key }}')">
                         CLAIM MY PLAN
                     </x-button>
                 </div>

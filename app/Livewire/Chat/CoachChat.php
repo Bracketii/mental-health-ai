@@ -35,6 +35,13 @@ class CoachChat extends Component
 
     public function sendMessage()
     {
+        // Check if the user is paid
+        // if (!auth()->user()->isPaid()) {
+        //     // Display an error message or redirect as appropriate
+        //     session()->flash('error', 'You need to be a paid subscriber to send messages.');
+        //     return;
+        // }
+
         $userMessage = trim($this->inputMessage);
 
         if ($userMessage === '') {
@@ -67,6 +74,30 @@ class CoachChat extends Component
     {
         return 'Hello! I\'m Run On Empathy, your Mental Health Coach. How can I assist you today?';
     }
+
+    private function buildContext($conversations)
+    {
+        return $conversations->reduce(function ($carry, $conversation) {
+            // Append the user message
+            $carry .= "User: " . $conversation->user_message . "\n";
+            
+            // Truncate the AI response if it's too long
+            $truncatedResponse = mb_substr($conversation->ai_response, 0, 200); // Adjust character limit as needed
+            $carry .= "Assistant: " . $truncatedResponse . (mb_strlen($conversation->ai_response) > 200 ? '...' : '') . "\n";
+            
+            return $carry;
+        }, "");
+    }
+    
+    private function getRecentConversations()
+    {
+        return ConversationHistory::where('user_id', Auth::id())
+            ->latest() // Orders by created_at in descending order by default
+            ->take(6) // Limits to the 6 most recent conversations
+            ->get()
+            ->reverse(); // Reverses the order to show oldest first among the 6
+    }
+    
 
     private function chatWithAI($input)
     {
@@ -102,6 +133,9 @@ class CoachChat extends Component
     
         // Retrieve user-specific answers to build context
         $userContext = $this->getUserContext();
+
+        $recentConversations = $this->getRecentConversations();
+        $history = $this->buildContext($recentConversations);
     
         // Customize system message for Mental Health Coach
         $customSystemMessage = 'Your name is Run On Empathy, a compassionate Mental Health Coach. Always give short answers. Your goal is to provide empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, short answers and suggestions and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity. \n\n{userContext}.';
@@ -110,7 +144,7 @@ class CoachChat extends Component
         $qa->systemMessageTemplate = $customSystemMessage;
     
         // Combine context and user input with clear separation
-        $fullPrompt = $userContext . "\nUser: " . $input . "\nAssistant (please respond in a structured and organized manner):";
+        $fullPrompt = $history . "\n" . $userContext . "\nUser: " . $input . "\nAssistant (please respond in a structured and organized manner):";
     
         $message = new Message();
         $message->content = $fullPrompt;

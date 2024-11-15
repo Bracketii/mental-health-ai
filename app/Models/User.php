@@ -73,4 +73,11 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserAnswer::class);
     }
+
+    public function isPaid()
+    {
+        return $this->subscribed('default'); // Replace 'default' with the actual subscription name if different
+    }
+    
+
 }

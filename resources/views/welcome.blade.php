@@ -36,11 +36,11 @@
         <!-- Hero Section -->
         <div class="flex flex-col lg:flex-row flex-grow lg:h-[680px]">
             <!-- Left Column -->
-            <div class="lg:w-1/2 bg-gray-900 text-white flex flex-col p-8">
+            <div class="lg:w-1/2 bg-[#1F0052] text-white flex flex-col p-8">
                 <!-- Content Container -->
                 <div class="container-sm mx-auto flex flex-col pr-5">
                     <!-- Logo -->
-                    <h1 class="text-4xl font-normal mb-6">Run On Empathy</h1>
+                    <h1 class="text-4xl font-normal text-white mb-6">run on empathy</h1>
 
                     <!-- Main Content -->
                     <div class="mt-24 pr-44">

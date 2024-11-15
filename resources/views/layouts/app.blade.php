@@ -7,23 +7,23 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
-
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <!-- Styles -->
         @livewireStyles
     </head>
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased [&::-webkit-scrollbar]:w-2
+    [&::-webkit-scrollbar-track]:bg-ap1
+    [&::-webkit-scrollbar-thumb]:bg-ap2
+    dark:[&::-webkit-scrollbar-track]:bg-slate-700
+    dark:[&::-webkit-scrollbar-thumb]:bg-slate-500">
         <x-banner />
 
-        <div class="min-h-screen bg-gray-100">
+        <div class="min-h-screen bg-ap1">
             @livewire('navigation-menu')
             <!-- Page Content -->
-            <main>
+            <main class=" mx-5 sm:mx-0">
                 {{ $slot }}
             </main>
         </div>

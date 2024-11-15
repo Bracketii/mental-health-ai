@@ -14,8 +14,17 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                sans: ['Lexend Deca', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'ap1': '#EADABD',
+                'ap2': '#42210B',
+                'ap3': '#EA9C6B',
+                'ap4': '#5000D0',
+                'ap5': '#6F72FF',
+                'ap6': '#9097FF',
+                'ap7': '#6F3AFF',
+              },
         },
     },
 
