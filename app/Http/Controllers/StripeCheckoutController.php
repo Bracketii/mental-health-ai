@@ -77,42 +77,71 @@ class StripeCheckoutController extends Controller
     public function success(Request $request)
     {
         $session_id = $request->query('session_id');
-    
+
         if (!$session_id) {
             return redirect()->route('home')->with('error', 'No session ID provided.');
         }
-    
-        // Retrieve the Checkout Session from Stripe
-        $session = Cashier::stripe()->checkout->sessions->retrieve($session_id);
-    
+
+        // Retrieve the Checkout Session from Stripe and expand the subscription
+        $session = Cashier::stripe()->checkout->sessions->retrieve($session_id, [
+            'expand' => ['subscription'],
+        ]);
+
         // Get customer email from metadata
         $email = $session->metadata->email ?? Session::get('pending_email');
-    
+
         if (!$email) {
             return redirect()->route('coach.generated')->with('error', 'Email not provided.');
         }
-    
+
+        // Retrieve 'selectedOptions' and 'gender' from the session before logging in
+        $selectedOptions = Session::get('selectedOptions');
+        $gender = Session::get('gender');
+
         // Find or create the user
         $user = User::firstOrCreate(
             ['email' => $email],
             [
                 'name' => 'User', // You may want to collect the name during email submission
                 'password' => Hash::make(Str::random(16)), // Temporary password; user will set it later
-                'gender' => Session::get('gender'),
+                'gender' => $gender,
             ]
         );
-    
+
         // Set the Stripe customer ID
         $user->stripe_id = $session->customer;
         $user->save();
-    
-        // Clear session data
+
+        // Retrieve the subscription from the session
+        $stripeSubscription = $session->subscription;
+
+        if (!$stripeSubscription) {
+            return redirect()->route('checkout')->with('error', 'Subscription not found.');
+        }
+
+        // Create the subscription in your database
+        $user->subscriptions()->create([
+            'name' => $session->metadata->plan,
+            'type'  => 'subscription',
+            'stripe_id' => $stripeSubscription->id,
+            'stripe_status' => $stripeSubscription->status,
+            'stripe_price' => $stripeSubscription->items->data[0]->price->id,
+            'quantity' => $stripeSubscription->quantity,
+            'ends_at' => $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
+        ]);
+
+        // Clear session data that isn't needed anymore
         Session::forget('pending_email');
         Session::forget('selected_plan');
-    
-        // Log the user in and redirect to password setup
+
+        // Log the user in
         Auth::login($user);
-    
+
+        // Restore 'selectedOptions' and 'gender' to the session after logging in
+        Session::put('selectedOptions', $selectedOptions);
+        Session::put('gender', $gender);
+
+        // Redirect to password setup
         return redirect()->route('password.setup')->with(['email' => $email, 'plan' => $session->metadata->plan]);
     }
 

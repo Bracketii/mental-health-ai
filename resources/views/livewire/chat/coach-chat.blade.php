@@ -33,29 +33,17 @@
 
     <!-- Chat Input -->
     <div class="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-        @if (session('error'))
-            <div class="mb-4 bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center shadow-lg" role="alert">
-                <div class="flex items-center">
-                    <span class="block sm:inline">{{ session('error') }}</span>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <x-nav-link
-                        href="{{ url('/') }}"
-                        class="bg-red-500 hover:bg-red-600 text-white text-sm uppercase px-4 py-2 rounded-lg focus:outline-none"
-                    >
-                        Upgrade
-                    </x-nav-link>
-                    <button 
-                        onclick="this.closest('div[role=alert]').remove();" 
-                        class="text-red-700 hover:text-red-900 focus:outline-none"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
+        <x-action-message on="not-paid" class="mb-4 text-red-600 text-xl text-center">
+            <div>
+                {{ __('You have to subscribe to proceed') }}
             </div>
-        @endif
+            <div class="mt-2">
+                <a href="{{ route('checkout') }}" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                    Subscribe Now
+                </a>
+            </div>
+        </x-action-message>
+        
         <div class="flex items-center">
             <x-input
                 wire:model.defer="inputMessage"

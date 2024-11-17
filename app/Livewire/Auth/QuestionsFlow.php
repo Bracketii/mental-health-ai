@@ -11,6 +11,7 @@ class QuestionsFlow extends Component
     public $questions;
     public $currentQuestionIndex = 0;
     public $selectedOptions = [];
+    public $stage = 'question'; // Possible values: 'question', 'intermediate', 'loading'
 
     public function mount()
     {
@@ -29,17 +30,30 @@ class QuestionsFlow extends Component
     {
         $question = $this->questions[$this->currentQuestionIndex];
         $this->selectedOptions[$question->id] = $optionId;
+    
+        // After answering the 5th question (index 4), show intermediate step
+        if ($this->currentQuestionIndex == 14 && $this->stage == 'question') {
+            $this->stage = 'intermediate';
+        } elseif ($this->currentQuestionIndex < count($this->questions) - 1 && $this->stage == 'question') {
+            $this->currentQuestionIndex++;
+        }
+        // Do not automatically finish the questionnaire on the last question
+    }
+    public function nextQuestion()
+    {
+        // Ensure the current question is answered before moving to the next
+        $question = $this->questions[$this->currentQuestionIndex];
+        if (!isset($this->selectedOptions[$question->id])) {
+            $this->dispatch('error');
+            return;
+        }
 
         if ($this->currentQuestionIndex < count($this->questions) - 1) {
             $this->currentQuestionIndex++;
-        } else {
-            // After answering all questions, store the selected options in session
-            Session::put('selectedOptions', $this->selectedOptions);
-
-            // Redirect to the coach generated page
-            return redirect()->route('coach.generated');
         }
     }
+
+    
 
     public function previousQuestion()
     {
@@ -48,25 +62,31 @@ class QuestionsFlow extends Component
         }
     }
 
-    public function nextQuestion()
-    {
-        if ($this->currentQuestionIndex < count($this->questions) - 1) {
-            $this->currentQuestionIndex++;
-        }
-    }
-
     public function finishQuestionnaire()
     {
         // Ensure the current question is answered
         $question = $this->questions[$this->currentQuestionIndex];
         if (!isset($this->selectedOptions[$question->id])) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Please answer the current question before finishing.']);
+            $this->dispatch('finish');
             return;
         }
-
+    
         // Store the selected options in session
         Session::put('selectedOptions', $this->selectedOptions);
+    
+        // Set stage to loading
+        $this->stage = 'loading';
+    }
+    
 
+    public function continueFromIntermediate()
+    {
+        $this->stage = 'question';
+        $this->currentQuestionIndex++;
+    }
+
+    public function redirectToCoach()
+    {
         // Redirect to the coach generated page
         return redirect()->route('coach.generated');
     }

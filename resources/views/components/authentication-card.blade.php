@@ -6,7 +6,7 @@
         {{ $logo }}
     </div>
 
-    <div class="{{ $fullWidth ? 'w-full max-w-4xl' : 'w-full sm:max-w-md' }} mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+    <div class="{{ $fullWidth ? 'max-w-4xl w-4/5 mb-8 sm:mb-0 sm:w-full' : 'w-4/5 sm:max-w-md' }} mt-6 px-6 py-4 bg-white shadow-md rounded-lg overflow-hidden sm:rounded-lg">
         {{ $slot }}
     </div>
 </div>

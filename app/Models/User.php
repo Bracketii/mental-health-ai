@@ -74,10 +74,14 @@ class User extends Authenticatable
         return $this->hasMany(UserAnswer::class);
     }
 
-    public function isPaid()
+    public function isSubscribedToPlan(string $planName): bool
     {
-        return $this->subscribed('default'); // Replace 'default' with the actual subscription name if different
+        return $this->subscriptions()->active()->where('name', $planName)->exists();
     }
     
-
+    public function hasActiveSubscription(): bool
+    {
+        return $this->subscriptions()->active()->exists();
+    }
+    
 }

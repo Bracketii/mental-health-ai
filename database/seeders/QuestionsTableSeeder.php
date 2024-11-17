@@ -157,7 +157,141 @@ class QuestionsTableSeeder extends Seeder
                     '🧐 Other',
                 ],
             ],
-            // Add more questions as needed
+            [
+                'text' => 'How do you typically manage stress?',
+                'order' => 18,
+                'options' => [
+                    '🧘 Meditation or relaxation techniques',
+                    '🏃 Physical activity or exercise',
+                    '🎮 Engaging in hobbies or distractions',
+                    '💬 Talking to friends or family',
+                    '🤷 I don’t have a specific strategy',
+                ],
+            ],
+            [
+                'text' => 'Do you agree with the statement: "I feel overwhelmed by my responsibilities more often than not?"',
+                'order' => 19,
+                'options' => [
+                    '✅ True',
+                    '❌ False',
+                ],
+            ],
+            [
+                'text' => 'How often do you find yourself overthinking past mistakes?',
+                'order' => 20,
+                'options' => [
+                    'Never',
+                    'Rarely',
+                    'Often',
+                    'Always',
+                ],
+            ],
+            [
+                'text' => 'How comfortable are you sharing your feelings with close friends or family?',
+                'order' => 21,
+                'options' => [
+                    '😟 Very uncomfortable',
+                    '😕 Slightly uncomfortable',
+                    '🙂 Neutral',
+                    '😊 Comfortable',
+                    '😍 Very comfortable',
+                ],
+            ],
+            [
+                'text' => 'Do you feel supported by those around you when facing challenges?',
+                'order' => 22,
+                'options' => [
+                    '😣 Not at all',
+                    '😕 Sometimes',
+                    '😊 Most of the time',
+                    '😍 Always',
+                ],
+            ],
+            [
+                'text' => 'Do you agree with the statement: "I tend to avoid asking for help even when I need it?"',
+                'order' => 23,
+                'options' => [
+                    '👍 Agree',
+                    '👎 Disagree',
+                ],
+            ],
+            [
+                'text' => 'What is your usual reaction when facing conflicts in relationships?',
+                'order' => 24,
+                'options' => [
+                    '😶 Avoid addressing the issue',
+                    '😡 React emotionally and impulsively',
+                    '🗣️ Communicate openly and calmly',
+                    '🤔 Overthink the situation before acting',
+                    '🤷 Not sure',
+                ],
+            ],
+            [
+                'text' => 'How often do you feel disconnected from the people around you?',
+                'order' => 25,
+                'options' => [
+                    'Never',
+                    'Rarely',
+                    'Sometimes',
+                    'Often',
+                    'Always',
+                ],
+            ],
+            [
+                'text' => 'Do you feel like you are able to balance your personal needs with the needs of others?',
+                'order' => 26,
+                'options' => [
+                    '😣 Not at all',
+                    '😕 Rarely',
+                    '😊 Sometimes',
+                    '😍 Most of the time',
+                    '🤔 Not sure',
+                ],
+            ],
+            [
+                'text' => 'What is your primary source of emotional support?',
+                'order' => 27,
+                'options' => [
+                    '👨‍👩‍👧 Family',
+                    '💬 Friends',
+                    '🧑‍⚕️ Therapy or professional help',
+                    '🧘 Self-care practices',
+                    '🤷 I don’t have a primary source of support',
+                ],
+            ],
+            [
+                'text' => 'How do you usually respond to criticism?',
+                'order' => 28,
+                'options' => [
+                    '😔 I take it personally and feel hurt',
+                    '🤔 I analyze it to see if it’s valid',
+                    '😶 I ignore it and move on',
+                    '💬 I discuss it to understand more',
+                    '😊 I appreciate it as constructive feedback',
+                ],
+            ],
+            [
+                'text' => 'How often do you prioritize your mental health over other responsibilities?',
+                'order' => 29,
+                'options' => [
+                    'Never',
+                    'Rarely',
+                    'Sometimes',
+                    'Often',
+                    'Always',
+                ],
+            ],
+            [
+                'text' => 'What would you describe as your biggest emotional challenge right now?',
+                'order' => 30,
+                'options' => [
+                    '😟 Managing stress',
+                    '💔 Navigating relationship difficulties',
+                    '😔 Dealing with self-doubt',
+                    '🤷 Identifying my emotions',
+                    '😊 Other',
+                ],
+            ],
         ];
 
         foreach ($questions as $q) {

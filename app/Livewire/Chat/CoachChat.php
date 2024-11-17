@@ -35,12 +35,13 @@ class CoachChat extends Component
 
     public function sendMessage()
     {
+        $user = Auth::user();
+        
         // Check if the user is paid
-        // if (!auth()->user()->isPaid()) {
-        //     // Display an error message or redirect as appropriate
-        //     session()->flash('error', 'You need to be a paid subscriber to send messages.');
-        //     return;
-        // }
+        if (!$user->hasActiveSubscription()) {
+            $this->dispatch('not-paid');
+            return;
+        }
 
         $userMessage = trim($this->inputMessage);
 
