@@ -59,35 +59,30 @@ class Dashboard extends Component
   */
   public function fetchMetrics()
   {
-      // Total Users
-      $this->totalUsers = Cache::remember('total_users', now()->addMinutes(10), function () {
-          return User::count();
-      });
+      // Total Users excluding admins
+      $this->totalUsers = User::where('role', '!=', 'admin')->count();
   
-      // Total Active Sessions
-      $this->totalActiveSessions = Cache::remember('total_active_sessions', now()->addMinutes(10), function () {
-          return DB::table('sessions')
-              ->distinct('user_id')
-              ->whereNotNull('user_id')
-              ->count('user_id');
-      });
+      // Total Active Sessions excluding admins
+      $this->totalActiveSessions = DB::table('sessions')
+          ->distinct('user_id')
+          ->join('users', 'sessions.user_id', '=', 'users.id')
+          ->where('users.role', '!=', 'admin')
+          ->count('sessions.user_id');
   
-      // Total Subscriptions
-      $this->totalSubscriptions = Cache::remember('total_subscriptions', now()->addMinutes(10), function () {
-          return Subscription::active()->count();
-      });
-
-        
-        $this->totalRevenue = Cache::remember('total_revenue', now()->addMinutes(10), function () {
-            return Subscription::active()
-                ->join('subscription_items', 'subscriptions.id', '=', 'subscription_items.subscription_id')
-                ->join('users', 'subscriptions.user_id', '=', 'users.id')
-                ->where('users.role', 'user') // Ensure only admin subscriptions are considered
-                ->sum(DB::raw('subscription_items.quantity * (subscription_items.stripe_price::numeric / 100)'));
-        });
-        
+      // Total Subscriptions excluding admins
+      $this->totalSubscriptions = Subscription::active()
+          ->join('users', 'subscriptions.user_id', '=', 'users.id')
+          ->where('users.role', '!=', 'admin')
+          ->count();
+  
+      // Total Revenue excluding admins
+      $this->totalRevenue = Subscription::active()
+          ->join('subscription_items', 'subscriptions.id', '=', 'subscription_items.subscription_id')
+          ->join('users', 'subscriptions.user_id', '=', 'users.id')
+          ->where('users.role', '!=', 'admin')
+          ->sum(DB::raw('subscription_items.quantity * (subscription_items.stripe_price / 100)'));
   }
-
+  
  /**
   * Render the component view.
   */
