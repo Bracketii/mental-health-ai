@@ -14,7 +14,7 @@ class Dashboard extends Component
  public $totalUsers;
  public $totalActiveSessions;
  public $totalSubscriptions;
- public $totalRevenue;
+ public $totalRevenue = 0;
 
  // Other properties (dummy data)
  public $activeProjects = 75; // Replace with real data if available
@@ -75,12 +75,6 @@ class Dashboard extends Component
           ->where('users.role', '!=', 'admin')
           ->count();
   
-      // Total Revenue excluding admins
-      $this->totalRevenue = Subscription::active()
-          ->join('subscription_items', 'subscriptions.id', '=', 'subscription_items.subscription_id')
-          ->join('users', 'subscriptions.user_id', '=', 'users.id')
-          ->where('users.role', '!=', 'admin')
-          ->sum(DB::raw('subscription_items.quantity * (subscription_items.stripe_price / 100)'));
   }
   
  /**
