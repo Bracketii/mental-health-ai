@@ -76,13 +76,16 @@ class Dashboard extends Component
       $this->totalSubscriptions = Cache::remember('total_subscriptions', now()->addMinutes(10), function () {
           return Subscription::active()->count();
       });
-  
-      // Total Revenue
-      $this->totalRevenue = Cache::remember('total_revenue', now()->addMinutes(10), function () {
-          return Subscription::active()
-              ->join('subscription_items', 'subscriptions.id', '=', 'subscription_items.subscription_id')
-              ->sum(DB::raw('subscription_items.quantity * (subscription_items.stripe_price / 100)'));
-      });
+
+        
+        $this->totalRevenue = Cache::remember('total_revenue', now()->addMinutes(10), function () {
+            return Subscription::active()
+                ->join('subscription_items', 'subscriptions.id', '=', 'subscription_items.subscription_id')
+                ->join('users', 'subscriptions.user_id', '=', 'users.id')
+                ->where('users.role', 'user') // Ensure only admin subscriptions are considered
+                ->sum(DB::raw('subscription_items.quantity * (subscription_items.stripe_price::numeric / 100)'));
+        });
+        
   }
 
  /**
