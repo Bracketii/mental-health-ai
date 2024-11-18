@@ -88,8 +88,8 @@
                 <!-- Navigation Links -->
                 <div class="flex flex-wrap justify-center md:justify-end space-x-4">
                     <a href="/login" wire:navigate class="text-gray-600 hover:text-gray-800">Login</a>
-                    <a href="#" class="text-gray-600 hover:text-gray-800">Terms</a>
-                    <a href="#" class="text-gray-600 hover:text-gray-800">Privacy</a>
+                    <a href="/terms-of-service" class="text-gray-600 hover:text-gray-800">Terms of service</a>
+                    <a href="/privacy-policy" class="text-gray-600 hover:text-gray-800">Privacy</a>
                     <a href="#" class="text-gray-600 hover:text-gray-800">Contact</a>
                 </div>
             </div>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasRoles;
 use App\Models\UserAnswer;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
@@ -15,13 +16,16 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable
 {
     use HasApiTokens;
-
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory;
     use HasProfilePhoto;
     use Notifiable;
     use TwoFactorAuthenticatable;
     use Billable;
+    use HasRoles;
+
+    // Define role constants
+    public const ROLE_USER = 'user';
+    public const ROLE_ADMIN = 'admin';
 
     /**
      * The attributes that are mass assignable.
@@ -33,6 +37,7 @@ class User extends Authenticatable
         'email',
         'password',
         'gender',
+        'role',
     ];
 
     /**
@@ -57,7 +62,7 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -69,16 +74,59 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Relationship: User has many subscriptions.
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    /**
+     * Relationship: User has many answers.
+     */
     public function answers()
     {
         return $this->hasMany(UserAnswer::class);
     }
 
+    /**
+     * Check if the user has admin role.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Check if the user has a specific role.
+     *
+     * @param string $role
+     * @return bool
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Check if the user is subscribed to a specific plan.
+     *
+     * @param string $planName
+     * @return bool
+     */
     public function isSubscribedToPlan(string $planName): bool
     {
         return $this->subscriptions()->active()->where('name', $planName)->exists();
     }
-    
+
+    /**
+     * Check if the user has any active subscription.
+     *
+     * @return bool
+     */
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()->active()->exists();

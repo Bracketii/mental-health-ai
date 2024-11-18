@@ -2,6 +2,8 @@
 
 use App\Livewire\Checkout;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Users\Index;
+use App\Livewire\Admin\Users\Create;
 use App\Livewire\Auth\PasswordSetup;
 use App\Livewire\Auth\QuestionsFlow;
 use App\Livewire\Auth\CoachGenerated;
@@ -9,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\RegistrationFlow;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\StripeCheckoutController;
+use \App\Livewire\Admin\Questionnaires\Index as QuestionnairesIndex;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,6 +25,20 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    // Admin routes ----------------------------------------------------
+    Route::prefix('admin')->middleware(['admin'])->group(function () {
+        Route::get('dashboard', Dashboard::class)->name('admin.dashboard');
+
+        // Users Management
+        Route::get('users', Index::class)->name('admin.users.index');
+        Route::get('users/create', Create::class)->name('admin.users.create');
+
+        // Questionnaires Management
+        Route::get('questionnaires', QuestionnairesIndex::class)->name('admin.questionnaires.index');
+    });
+    // End Admin routes ------------------------------------------------
+    
 });
 
 
@@ -37,5 +54,3 @@ Route::get('/stripe/cancel', [StripeCheckoutController::class, 'cancel'])->name(
 Route::get('/password-setup', PasswordSetup::class)->name('password.setup');
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');
 
-
-Route::get('admin/dashboard', Dashboard::class)->name('admin.dashboard');

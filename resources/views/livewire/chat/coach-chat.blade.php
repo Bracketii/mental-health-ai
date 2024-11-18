@@ -38,7 +38,7 @@
                 {{ __('You have to subscribe to proceed') }}
             </div>
             <div class="mt-2">
-                <a href="{{ route('checkout') }}" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
+                <a href="/" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
                     Subscribe Now
                 </a>
             </div>

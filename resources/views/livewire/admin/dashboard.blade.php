@@ -14,36 +14,36 @@
             </div>
         </div>
 
-        <!-- Active Projects Card -->
+        <!-- Total Active Sessions Card -->
         <div class="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 flex items-center space-x-4">
             <div class="p-3 bg-green-100 rounded-full dark:bg-green-700">
-                <i class='bx bx-folder-open text-green-500 dark:text-white text-3xl'></i>
+                <i class='bx bx-time-five text-green-500 dark:text-white text-3xl'></i>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Active Projects</h3>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeProjects) }}</p>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Active Sessions</h3>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalActiveSessions) }}</p>
             </div>
         </div>
 
-        <!-- Pending Tasks Card -->
+        <!-- Total Subscriptions Card -->
         <div class="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 flex items-center space-x-4">
             <div class="p-3 bg-yellow-100 rounded-full dark:bg-yellow-700">
-                <i class='bx bx-task text-yellow-500 dark:text-white text-3xl'></i>
+                <i class='bx bx-credit-card text-yellow-500 dark:text-white text-3xl'></i>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Pending Tasks</h3>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($pendingTasks) }}</p>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Total Subscriptions</h3>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($totalSubscriptions) }}</p>
             </div>
         </div>
 
-        <!-- Active Subscriptions Card -->
+        <!-- Total Revenue Card -->
         <div class="bg-white dark:bg-neutral-800 shadow rounded-lg p-6 flex items-center space-x-4">
             <div class="p-3 bg-purple-100 rounded-full dark:bg-purple-700">
-                <i class='bx bx-credit-card text-purple-500 dark:text-white text-3xl'></i>
+                <i class='bx bx-dollar text-purple-500 dark:text-white text-3xl'></i>
             </div>
             <div>
-                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Active Subscriptions</h3>
-                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($activeSubscriptions) }}</p>
+                <h3 class="text-lg font-semibold text-gray-700 dark:text-neutral-200">Total Revenue</h3>
+                <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-white">${{ number_format($totalRevenue, 2) }}</p>
             </div>
         </div>
     </div>
@@ -148,5 +148,3 @@
         </ul>
     </div>
 </div>
-
-

@@ -44,7 +44,7 @@
                     @endphp
                     <x-secondary-button
                         wire:click="answerQuestion({{ $option->id }})"
-                        class="px-4 py-2 rounded-lg transition text-left {{ $isSelected ? 'bg-ap5 hover:bg-ap4 text-white' : 'bg-gray-200 hover:bg-gray-300' }}"
+                        class="px-4 py-2 rounded-lg transition text-left {{ $isSelected ? '!bg-indigo-500 hover:bg-indigo-600 text-white' : 'bg-gray-200 hover:bg-gray-300' }}"
                     >
                         {{ $option->text }}
                     </x-secondary-button>

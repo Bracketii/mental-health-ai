@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
@@ -19,7 +20,7 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    public function boot()
+    public function boot(Router $router): void
     {
         if ($this->app->environment('production')) {
             // Force HTTPS routes
@@ -29,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
         Blade::directive('markdown', function ($expression) {
             return "<?php echo (new Parsedown)->text($expression); ?>";
         });
+
+         // Register middleware globally
+         $router->aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
     }
 }
