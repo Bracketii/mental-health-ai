@@ -17,7 +17,7 @@
         <!-- Progress Indicator -->
         <div class="mb-4">
             <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div class="bg-indigo-500 h-2.5 rounded-full" style="width: {{ (($currentQuestionIndex + 1) / count($questions)) * 100 }}%"></div>
+                <div class="bg-ap4 h-2.5 rounded-full" style="width: {{ (($currentQuestionIndex + 1) / count($questions)) * 100 }}%"></div>
             </div>
             <p class="text-sm text-gray-600 mt-1">{{ ($currentQuestionIndex + 1) }} of {{ count($questions) }} questions answered</p>
         </div>
@@ -52,30 +52,30 @@
         <!-- Navigation Buttons -->
         <div class="flex justify-between mt-6">
             @if ($currentQuestionIndex > 0)
-                <button
+                <x-button
                     wire:click="previousQuestion"
-                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                    class="transition"
                 >
                     Previous
-                </button>
+                </x-button>
             @else
                 <div></div>
             @endif
 
             @if ($currentQuestionIndex < count($questions) - 1)
-                <button
+                <x-button
                     wire:click="nextQuestion"
-                    class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                    class="transition"
                 >
                     Next
-                </button>
+                </x-button>
             @else
-                <button
+                <x-button
                     wire:click="finishQuestionnaire"
-                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                    class="bg-green-600 hover:bg-green-700 transition"
                 >
                     Finish
-                </button>
+                </x-button>
             @endif
         </div>
     @elseif ($stage === 'intermediate')
@@ -85,12 +85,12 @@
             <p class="mb-6">
                 You've answered the first part of the questionnaire. Take a moment to relax before continuing.
             </p>
-            <button
+            <x-button
                 wire:click="continueFromIntermediate"
-                class="px-6 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+                class="transition"
             >
                 Continue
-            </button>
+            </x-button>
         </div>
     @elseif ($stage === 'coach_selection')
         <!-- Coach Selection Stage -->
@@ -110,19 +110,20 @@
                         <div class="flex-shrink-0 w-full px-4">
                             <div class="coach-card mx-auto max-w-md bg-gray-100 rounded-lg shadow-md p-6 text-center">
                                 <img
-                                    src="{{ asset($coach->avatar) }}"
+                                    src="{{ $coach->avatar ? Storage::url($coach->avatar) : asset('images/default-avatar.png') }}"
                                     alt="{{ $coach->name }}"
-                                    class="w-24 h-24 rounded-full mx-auto object-cover mb-4"
-                                >
+                                    class="w-40 h-40 rounded-full mx-auto object-cover mb-4"
+                                />
+                                
                                 <h3 class="text-xl font-semibold">{{ $coach->name }}</h3>
                                 <p class="text-sm text-gray-600 mb-2">{{ $coach->designation }}</p>
                                 <p class="text-sm text-gray-500 mb-4">{{ $coach->bio }}</p>
-                                <button
+                                <x-button
                                     wire:click="selectCoach({{ $coach->id }})"
                                     class="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
                                 >
                                     Select
-                                </button>
+                                </x-button>
                             </div>
                         </div>
                     @endforeach
@@ -131,7 +132,7 @@
                 <!-- Left Arrow -->
                 <button
                     @click="currentSlide = (currentSlide > 0) ? currentSlide - 1 : currentSlide"
-                    class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-gray-300 bg-opacity-50 hover:bg-opacity-75 text-white rounded-full p-2 focus:outline-none"
+                    class="absolute top-1/2 left-2 transform -translate-y-1/2 bg-ap3 bg-opacity-50 hover:bg-opacity-75 text-white rounded-full p-2 focus:outline-none"
                     :disabled="currentSlide === 0"
                 >
                     <!-- Left Arrow Icon -->
@@ -145,7 +146,7 @@
                 <!-- Right Arrow -->
                 <button
                     @click="currentSlide = (currentSlide < {{ count($coaches) - 1 }}) ? currentSlide + 1 : currentSlide"
-                    class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-gray-300 bg-opacity-50 hover:bg-opacity-75 text-white rounded-full p-2 focus:outline-none"
+                    class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-ap3 bg-opacity-50 hover:bg-opacity-75 text-white rounded-full p-2 focus:outline-none"
                     :disabled="currentSlide === {{ count($coaches) - 1 }}"
                 >
                     <!-- Right Arrow Icon -->

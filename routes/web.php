@@ -11,7 +11,12 @@ use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\RegistrationFlow;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\StripeCheckoutController;
+use App\Livewire\Admin\CoachManagement\Index as CoachIndex;
 use \App\Livewire\Admin\Questionnaires\Index as QuestionnairesIndex;
+use App\Livewire\Admin\ContextManagement\Index as ContextManagementIndex;
+use App\Livewire\Admin\SystemMessageManagement\Index as SystemMessageIndex;
+use App\Livewire\Admin\ConversationMonitor\Index as ConversationMonitorIndex;
+use App\Livewire\Admin\SubscriptionMonitor\Index as SubscriptionMonitorIndex;
 
 Route::get('/', function () {
     return view('welcome');
@@ -41,6 +46,17 @@ Route::middleware([
 
         // Questionnaires Management
         Route::get('questionnaires', QuestionnairesIndex::class)->name('admin.questionnaires.index');
+
+        // Questionnaires Management
+        Route::get('coaches', CoachIndex::class)->name('admin.coaches.index');
+
+        Route::get('system-messages', SystemMessageIndex::class)->name('admin.system-messages');
+
+        Route::get('gpt-management', ContextManagementIndex::class)->name('admin.gpt-management');
+
+        Route::get('conversation-monitor', ConversationMonitorIndex::class)->name('admin.conversation-monitor');
+
+        Route::get('subscriptions-monitor', SubscriptionMonitorIndex::class)->name('admin.subscriptions-monitor');
     });
     // End Admin routes ------------------------------------------------
 });

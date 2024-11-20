@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             QuestionsTableSeeder::class,
             AdminUserSeeder::class,
             CoachesTableSeeder::class,
+            SystemMessageSeeder::class,
         ]);
     }
 }

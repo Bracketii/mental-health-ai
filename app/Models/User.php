@@ -8,6 +8,7 @@ use App\Traits\HasRoles;
 use App\Models\UserAnswer;
 use Laravel\Cashier\Billable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\ConversationHistory;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -34,12 +35,8 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'gender',
-        'role',
+    protected $guarded = [
+
     ];
 
     /**
@@ -139,4 +136,9 @@ class User extends Authenticatable
         return $this->belongsTo(Coach::class);
     }
     
+    public function conversations()
+    {
+        return $this->hasMany(ConversationHistory::class, 'user_id');
+    }
+
 }

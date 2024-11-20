@@ -35,8 +35,8 @@ class QuestionsFlow extends Component
         // Fetch all questions ordered by the 'order' field
         $this->questions = Question::orderBy('order')->with('options')->get();
 
-        // Fetch all coaches
-        $this->coaches = Coach::all();
+        // Fetch all coaches and shuffle them for random order
+        $this->coaches = Coach::all()->shuffle();
     }
 
     public function answerQuestion($optionId)
@@ -45,10 +45,10 @@ class QuestionsFlow extends Component
         $this->selectedOptions[$question->id] = $optionId;
 
         // Check if the next stage is to show intermediate or proceed with questions
-        if ($this->currentQuestionIndex == 14 && $this->stage == 'question') { // Adjust index as needed
-            $this->stage = 'intermediate';
-        } elseif ($this->currentQuestionIndex < count($this->questions) - 1 && $this->stage == 'question') {
+        if ($this->currentQuestionIndex < count($this->questions) - 1 && $this->stage == 'question') {
             $this->currentQuestionIndex++;
+        } elseif ($this->stage == 'question') {
+            $this->stage = 'intermediate';
         }
     }
 
@@ -82,7 +82,7 @@ class QuestionsFlow extends Component
             'selectedCoachId' => 'required|exists:coaches,id',
         ]);
 
-        // After selecting a coach, return to the question stage to continue
+        // After selecting a coach, proceed to finish the questionnaire
         $this->stage = 'question';
     }
 

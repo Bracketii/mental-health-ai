@@ -57,6 +57,12 @@
                                         <span class="ml-3">Dashboard</span>
                                     </x-nav-link>
                                 </li>
+                                <li>
+                                    <x-nav-link href="{{ route('admin.conversation-monitor') }}" :active="request()->routeIs('admin.conversation-monitor')">
+                                        <i class='bx bx-home-alt'></i>
+                                        <span class="ml-3">Chat Monitor</span>
+                                    </x-nav-link>
+                                </li>
 
                                 <!-- Users Accordion -->
                                 <li x-data="{ open: false }" class="space-y-1">
@@ -129,6 +135,18 @@
                                         <span class="ml-3">Dashboard</span>
                                     </x-nav-link>
                                 </li>
+                                <li>
+                                    <x-nav-link href="{{ route('admin.conversation-monitor') }}" :active="request()->routeIs('admin.conversation-monitor')">
+                                        <i class='bx bx-message-square-dots'></i>
+                                        <span class="ml-3">Chat Monitor</span>
+                                    </x-nav-link>
+                                </li>
+                                <li>
+                                    <x-nav-link href="{{ route('admin.subscriptions-monitor') }}" :active="request()->routeIs('admin.subscriptions-monitor')">
+                                        <i class='bx bx-wallet' ></i>
+                                        <span class="ml-3">Subscriptions</span>
+                                    </x-nav-link>
+                                </li>
 
                                 <!-- Users Accordion -->
                                 <li x-data="{ open: false }" class="space-y-1">
@@ -164,12 +182,35 @@
                                     </ul>
                                 </li>
 
-                                <!-- Settings Link -->
+                                <!-- Dashboard Link -->
                                 <li>
-                                    <x-nav-link href="" :active="request()->routeIs('admin.settings')">
+                                    <x-nav-link href="{{ route('admin.coaches.index') }}" :active="request()->routeIs('admin.coaches.index')">
+                                        <i class='bx bx-heart'></i>
+                                        <span class="ml-3">Coaches</span>
+                                    </x-nav-link>
+                                </li>
+
+                                <!-- Settings Accordion -->
+                                <li x-data="{ open: false }" class="space-y-1">
+                                    <button @click="open = !open" class="w-full flex items-center p-2 text-gray-700 dark:text-neutral-300 hover:bg-gray-100 dark:hover:bg-neutral-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
                                         <i class='bx bx-cog'></i>
                                         <span class="ml-3">Settings</span>
-                                    </x-nav-link>
+                                        <i :class="{'rotate-180': open}" class='bx bx-chevron-down ml-auto transition-transform duration-200'></i>
+                                    </button>
+                                    <ul x-show="open" x-transition class="pl-2 mt-1 space-y-3 overflow-hidden">
+                                        <li>
+                                            <x-nav-link href="{{ route('admin.system-messages') }}" :active="request()->routeIs('admin.system-messages.*')">
+                                                <i class='bx bxs-circle' style="font-size: 7px"></i>
+                                                <span class="ml-3">System Messages</span>
+                                            </x-nav-link>
+                                        </li>
+                                        <li>
+                                            <x-nav-link href="{{ route('admin.gpt-management') }}" :active="request()->routeIs('admin.gpt-management.*')">
+                                                <i class='bx bxs-circle' style="font-size: 7px"></i>
+                                                <span class="ml-3">GPT Engine</span>
+                                            </x-nav-link>
+                                        </li>
+                                    </ul>
                                 </li>
                             </ul>
                         </nav>
