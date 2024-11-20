@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Coach;
 use App\Traits\HasRoles;
 use App\Models\UserAnswer;
 use Laravel\Cashier\Billable;
@@ -10,6 +11,7 @@ use Laravel\Sanctum\HasApiTokens;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -130,6 +132,11 @@ class User extends Authenticatable
     public function hasActiveSubscription(): bool
     {
         return $this->subscriptions()->active()->exists();
+    }
+
+    public function coach(): BelongsTo
+    {
+        return $this->belongsTo(Coach::class);
     }
     
 }

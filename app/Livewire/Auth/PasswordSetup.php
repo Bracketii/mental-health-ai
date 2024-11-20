@@ -22,6 +22,11 @@ class PasswordSetup extends Component
 
     public function mount()
     {
+        // Skip for logged-in users
+        if (Auth::check()) {
+            return redirect()->route('dashboard')->with('success', 'Subscription successful! Welcome back.');
+        }
+
         $this->email = session('email');
         $this->plan = session('plan');
 
@@ -34,39 +39,34 @@ class PasswordSetup extends Component
     {
         $this->validate();
 
-        // Find the user
         $user = User::where('email', $this->email)->first();
 
         if (!$user) {
             return redirect()->route('coach.generated')->with('error', 'User not found.');
         }
 
-        // Update the user's password
         $user->password = Hash::make($this->password);
         $user->save();
 
-        // Retrieve selectedOptions from session
-        $selectedOptions = Session::get('selectedOptions', []);
+        $this->recordAnswers($user->id);
 
-        if (!empty($selectedOptions)) {
-            foreach ($selectedOptions as $question_id => $option_id) {
-                UserAnswer::create([
-                    'user_id' => $user->id,
-                    'question_id' => $question_id,
-                    'option_id' => $option_id,
-                ]);
-            }
-        }
+        Session::forget(['selectedOptions', 'selected_plan']);
 
-        // Clear session data
-        Session::forget('selectedOptions');
-        Session::forget('selected_plan');
-        // 'pending_email' was already cleared in the success controller
-
-        // Log the user in
         Auth::login($user);
 
-        return redirect()->route('dashboard')->with('success', 'Account created and subscription successful! Welcome to Emotica.');
+        return redirect()->route('dashboard')->with('success', 'Account created and subscription successful!');
+    }
+
+    private function recordAnswers($userId)
+    {
+        $selectedOptions = Session::get('selectedOptions', []);
+        foreach ($selectedOptions as $questionId => $optionId) {
+            UserAnswer::create([
+                'user_id' => $userId,
+                'question_id' => $questionId,
+                'option_id' => $optionId,
+            ]);
+        }
     }
 
     public function render()

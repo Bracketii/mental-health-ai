@@ -32,3 +32,8 @@
         @endforeach
     </div>
 </x-authentication-card>
+<script>
+    Livewire.on('redirectToStripe', url => {
+        window.location.href = url;
+    });
+</script>

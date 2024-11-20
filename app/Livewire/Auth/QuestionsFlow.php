@@ -2,8 +2,11 @@
 
 namespace App\Livewire\Auth;
 
+use App\Models\Coach;
 use Livewire\Component;
 use App\Models\Question;
+use App\Models\UserAnswer;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 
 class QuestionsFlow extends Component
@@ -11,7 +14,14 @@ class QuestionsFlow extends Component
     public $questions;
     public $currentQuestionIndex = 0;
     public $selectedOptions = [];
-    public $stage = 'question'; // Possible values: 'question', 'intermediate', 'loading'
+    public $stage = 'question'; // Possible values: 'question', 'intermediate', 'coach_selection'
+
+    // Properties for coach selection
+    public $coaches;
+    public $selectedCoachId;
+
+    // Properties for carousel functionality
+    public $currentCoachSlide = 0;
 
     public function mount()
     {
@@ -24,27 +34,29 @@ class QuestionsFlow extends Component
 
         // Fetch all questions ordered by the 'order' field
         $this->questions = Question::orderBy('order')->with('options')->get();
+
+        // Fetch all coaches
+        $this->coaches = Coach::all();
     }
 
     public function answerQuestion($optionId)
     {
         $question = $this->questions[$this->currentQuestionIndex];
         $this->selectedOptions[$question->id] = $optionId;
-    
-        // After answering the 5th question (index 4), show intermediate step
-        if ($this->currentQuestionIndex == 14 && $this->stage == 'question') {
+
+        // Check if the next stage is to show intermediate or proceed with questions
+        if ($this->currentQuestionIndex == 14 && $this->stage == 'question') { // Adjust index as needed
             $this->stage = 'intermediate';
         } elseif ($this->currentQuestionIndex < count($this->questions) - 1 && $this->stage == 'question') {
             $this->currentQuestionIndex++;
         }
-        // Do not automatically finish the questionnaire on the last question
     }
+
     public function nextQuestion()
     {
-        // Ensure the current question is answered before moving to the next
         $question = $this->questions[$this->currentQuestionIndex];
         if (!isset($this->selectedOptions[$question->id])) {
-            $this->dispatch('error');
+            session()->flash('error', 'Please answer the current question before proceeding.');
             return;
         }
 
@@ -53,8 +65,6 @@ class QuestionsFlow extends Component
         }
     }
 
-    
-
     public function previousQuestion()
     {
         if ($this->currentQuestionIndex > 0) {
@@ -62,33 +72,88 @@ class QuestionsFlow extends Component
         }
     }
 
+    // Handle coach selection from the carousel
+    public function selectCoach($coachId)
+    {
+        $this->selectedCoachId = $coachId;
+
+        // Validate the selected coach
+        $this->validate([
+            'selectedCoachId' => 'required|exists:coaches,id',
+        ]);
+
+        // After selecting a coach, return to the question stage to continue
+        $this->stage = 'question';
+    }
+
     public function finishQuestionnaire()
     {
-        // Ensure the current question is answered
-        $question = $this->questions[$this->currentQuestionIndex];
-        if (!isset($this->selectedOptions[$question->id])) {
-            $this->dispatch('finish');
+        // Ensure all questions are answered
+        $lastQuestion = $this->questions[count($this->questions) - 1];
+        if (!isset($this->selectedOptions[$lastQuestion->id])) {
+            session()->flash('error', 'Please complete all questions before finishing.');
             return;
         }
-    
-        // Store the selected options in session
-        Session::put('selectedOptions', $this->selectedOptions);
-    
-        // Set stage to loading
-        $this->stage = 'loading';
+
+        // Ensure a coach has been selected
+        if (!$this->selectedCoachId) {
+            session()->flash('error', 'Please select a coach before finishing.');
+            return;
+        }
+
+        // Record answers and coach selection for logged-in users
+        if (Auth::check()) {
+            $this->recordAnswers(Auth::id());
+            $this->recordCoach(Auth::id());
+        } else {
+            // Store the selected options and coach in session for guest users
+            Session::put('selectedOptions', $this->selectedOptions);
+            Session::put('selectedCoachId', $this->selectedCoachId);
+        }
+
+        // Redirect based on user state
+        return Auth::check() ? redirect()->route('checkout') : redirect()->route('coach.generated');
     }
-    
+
+    private function recordAnswers($userId)
+    {
+        foreach ($this->selectedOptions as $questionId => $optionId) {
+            UserAnswer::updateOrCreate(
+                [
+                    'user_id' => $userId,
+                    'question_id' => $questionId,
+                ],
+                ['option_id' => $optionId]
+            );
+        }
+    }
+
+    private function recordCoach($userId)
+    {
+        // Assign the selected coach to the user
+        $user = Auth::user();
+        $user->coach_id = $this->selectedCoachId;
+        $user->save();
+    }
 
     public function continueFromIntermediate()
     {
-        $this->stage = 'question';
-        $this->currentQuestionIndex++;
+        $this->stage = 'coach_selection';
     }
 
-    public function redirectToCoach()
+    // Carousel navigation methods
+    public function previousCoach()
     {
-        // Redirect to the coach generated page
-        return redirect()->route('coach.generated');
+        if ($this->currentCoachSlide > 0) {
+            $this->currentCoachSlide--;
+        }
+    }
+
+    public function nextCoach()
+    {
+        if ($this->currentCoachSlide < count($this->coaches) - 1) {
+            $this->currentCoachSlide++;
+        }
     }
 
     public function render()

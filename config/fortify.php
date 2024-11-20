@@ -3,7 +3,11 @@
 use Laravel\Fortify\Features;
 
 return [
-
+    'redirects' => [
+        'login' => '/dashboard',
+        'register' => '/dashboard',
+        'logout' => '/',
+    ],
     /*
     |--------------------------------------------------------------------------
     | Fortify Guard
@@ -73,7 +77,7 @@ return [
     |
     */
 
-    'home' => '/dashboard',
+    // 'home' => '/dashboard',
 
     /*
     |--------------------------------------------------------------------------

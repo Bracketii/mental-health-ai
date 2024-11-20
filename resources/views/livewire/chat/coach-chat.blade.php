@@ -1,13 +1,16 @@
 <!-- resources/views/livewire/chat/coach-chat.blade.php -->
 
-<div class="flex flex-col h-full pt-3">
+<div class="flex flex-col max-h-[650px] overflow-y-auto pt-3">
     <!-- Chat Messages -->
     <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
         @foreach($messages as $message)
             @if($message['role'] === 'assistant')
                 <div class="flex">
-                    {{-- <img src="{{ asset('images/assistant-avatar.jpg') }}" alt="Assistant" class="h-10 w-10 rounded-full"> --}}
-                    <x-application-logo class="h-10 w-10 rounded-full" />
+                    @if($coach && $coach->avatar)
+                        <img src="{{ asset($coach->avatar) }}" alt="{{ $coach->name }}" class="h-10 w-10 rounded-full object-cover">
+                    @else
+                        <x-application-logo class="h-10 w-10 rounded-full" />
+                    @endif
                     <div class="ml-3 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2 max-w-xl break-words">
                         @markdown($message['content'])
                     </div>
@@ -52,27 +55,17 @@
                 placeholder="Type your message..."
                 class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
             />
-            <x-button wire:click="sendMessage" class="ml-2 hover:bg-apt6" style="padding: 10px">
+            <x-button wire:click="sendMessage" class="ml-2 hover:bg-ap6" style="padding: 10px">
                 <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                     <path d="M2.6 13.083L3.452 14.594L16 9.167L10 16L18.6 19.916a1 1 0 0 0 1.399-.85L21 4.917a1.002 1.002 0 0 0-1.424-.972L3.001 12.95a1.002 1.002 0 0 0 .025 1.822zM8 22.167L12.776 19.851L8 17.623z"></path>
                 </svg>
+            </x-button>
+            <x-button title="New Chat" wire:click="startNewChat" class="ml-2 bg-gray-400 hover:bg-ap6" style="padding: 10px">
+                <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 2H8C4.691 2 2 4.691 2 8v13a1 1 0 0 0 1 1h13c3.309 0 6-2.691 6-6V8c0-3.309-2.691-6-6-6zm4 14c0 2.206-1.794 4-4 4H4V8c0-2.206 1.794-4 4-4h8c2.206 0 4 1.794 4 4v8z"></path><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path></svg>
             </x-button>
         </div>
 
         <!-- Validation Errors -->
         <x-validation-errors class="mt-2" />
     </div>
-
-    @push('scripts')
-        <script>
-            document.addEventListener('livewire:load', function () {
-                Livewire.hook('message.processed', (message, component) => {
-                    const chatMessages = document.getElementById('chat-messages');
-                    if (chatMessages) {
-                        chatMessages.scrollTop = chatMessages.scrollHeight;
-                    }
-                });
-            });
-        </script>
-    @endpush
 </div>

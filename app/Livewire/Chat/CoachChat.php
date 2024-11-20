@@ -22,24 +22,57 @@ class CoachChat extends Component
 {
     public $messages = [];
     public $inputMessage = '';
+    // Removed public $isTyping;
+
     private $coachType = 'mental_health'; // Fixed coach type
 
     public function mount()
     {
-        // Initialize with a welcome message from the Mental Health Coach
-        $this->messages[] = [
-            'role' => 'assistant',
-            'content' => $this->getWelcomeMessage(),
-        ];
+        $user = Auth::user();
+
+        // Fetch coach information
+        $coach = $user->coach;
+
+        if ($coach) {
+            $welcomeMessage = "Hello! I'm {$coach->name}, your {$coach->designation}. How can I assist you today?";
+        } else {
+            $welcomeMessage = "Hello! I'm your Mental Health Coach. How can I assist you today?";
+        }
+
+        // Load existing conversations
+        $conversations = $this->getRecentConversations();
+
+        if ($conversations->isEmpty()) {
+            // Initialize with a welcome message from the Coach
+            $this->messages[] = [
+                'role' => 'assistant',
+                'content' => $welcomeMessage,
+                'type' => 'ai',
+            ];
+        } else {
+            // Load existing messages
+            foreach ($conversations as $conversation) {
+                $this->messages[] = [
+                    'role' => 'user',
+                    'content' => $conversation->user_message,
+                    'type' => 'user',
+                ];
+                $this->messages[] = [
+                    'role' => 'assistant',
+                    'content' => $conversation->ai_response,
+                    'type' => 'ai',
+                ];
+            }
+        }
     }
 
     public function sendMessage()
     {
         $user = Auth::user();
-        
+
         // Check if the user is paid
         if (!$user->hasActiveSubscription()) {
-            $this->dispatch('not-paid');
+            $this->dispatchBrowserEvent('not-paid');
             return;
         }
 
@@ -53,27 +86,46 @@ class CoachChat extends Component
         $this->messages[] = [
             'role' => 'user',
             'content' => $userMessage,
+            'type' => 'user',
         ];
 
         // Clear input
         $this->inputMessage = '';
 
+        // Save user message to conversation history
+        $conversation = ConversationHistory::create([
+            'user_id' => Auth::id(),
+            'coach_type' => $this->coachType,
+            'user_message' => $userMessage,
+            'ai_response' => '',
+            'created_at' => now(),
+        ]);
+
         // Process AI response
         $aiResponse = $this->chatWithAI($userMessage);
+
+        // Update the conversation history with AI response
+        $conversation->ai_response = $aiResponse;
+        $conversation->save();
 
         // Add AI response to chat
         $this->messages[] = [
             'role' => 'assistant',
             'content' => $aiResponse,
+            'type' => 'ai',
         ];
-
-        // Save conversation to database
-        $this->saveConversation($userMessage, $aiResponse);
     }
 
     private function getWelcomeMessage()
     {
-        return 'Hello! I\'m Run On Empathy, your Mental Health Coach. How can I assist you today?';
+        $user = Auth::user();
+        $coach = $user->coach;
+
+        if ($coach) {
+            return "Hello! I'm {$coach->name}, your {$coach->designation}. How can I assist you today?";
+        }
+
+        return 'Hello! I\'m your Mental Health Coach. How can I assist you today?';
     }
 
     private function buildContext($conversations)
@@ -81,15 +133,15 @@ class CoachChat extends Component
         return $conversations->reduce(function ($carry, $conversation) {
             // Append the user message
             $carry .= "User: " . $conversation->user_message . "\n";
-            
+
             // Truncate the AI response if it's too long
             $truncatedResponse = mb_substr($conversation->ai_response, 0, 200); // Adjust character limit as needed
             $carry .= "Assistant: " . $truncatedResponse . (mb_strlen($conversation->ai_response) > 200 ? '...' : '') . "\n";
-            
+
             return $carry;
         }, "");
     }
-    
+
     private function getRecentConversations()
     {
         return ConversationHistory::where('user_id', Auth::id())
@@ -98,59 +150,65 @@ class CoachChat extends Component
             ->get()
             ->reverse(); // Reverses the order to show oldest first among the 6
     }
-    
 
     private function chatWithAI($input)
     {
         $openaiService = config('services.openai');
         $config = new OpenAIConfig();
         $config->apiKey = $openaiService['api_key'];
-    
-        // Define model for Mental Health Coach
+
+        // Fetch coach information
+        $user = Auth::user();
+        $coach = $user->coach;
+
+        if ($coach) {
+            $systemMessage = "Your name is {$coach->name}, a {$coach->designation}. Always give short answers. Your goal is to provide empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, short answers and suggestions and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity.";
+        } else {
+            // Default system message
+            $systemMessage = 'Your name is Run On Empathy, a compassionate Mental Health Coach. Always give short answers. Your goal is to provide empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, short answers and suggestions and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity.';
+        }
+
         $config->model = 'gpt-4o-mini';
-    
+
         $config->modelOptions = [
             'presence_penalty' => 0.6, // Encourage new topics
             'frequency_penalty' => 0.3, // Reduce repetition
         ];
-        
+
         $chat = new OpenAIChat($config);
-    
+
         $vectorStore = new FileSystemVectorStore();
         $embeddingGenerator = new OpenAIADA002EmbeddingGenerator();
-    
+
         if ($vectorStore->getNumberOfDocuments() === 0) {
             // Load context from the Mental Health context file
             $contextFile = base_path('app/Http/mental_health_context.txt');
-    
+
             $dataReader = new FileDataReader($contextFile);
             $documents = $dataReader->getDocuments();
             $splittedDocs = DocumentSplitter::splitDocuments($documents, 2000);
             $formattedDocs = EmbeddingFormatter::formatEmbeddings($splittedDocs);
-    
+
             $embeddedDocs = $embeddingGenerator->embedDocuments($formattedDocs);
             $vectorStore->addDocuments($embeddedDocs);
         }
-    
+
         // Retrieve user-specific answers to build context
         $userContext = $this->getUserContext();
 
         $recentConversations = $this->getRecentConversations();
         $history = $this->buildContext($recentConversations);
-    
-        // Customize system message for Mental Health Coach
-        $customSystemMessage = 'Your name is Run On Empathy, a compassionate Mental Health Coach. Always give short answers. Your goal is to provide empathetic, and conversational dialogue to help users navigate their mental well-being. Use a warm and understanding tone, short answers and suggestions and ensure your responses are supportive and non-judgmental. When providing information or advice, structure your responses using bullet points or numbered lists for clarity. \n\n{userContext}.';
-    
-        $qa = new QuestionAnswering($vectorStore, $embeddingGenerator, $chat);
-        $qa->systemMessageTemplate = $customSystemMessage;
-    
-        // Combine context and user input with clear separation
+
+        // Combine system message, history, and user context
         $fullPrompt = $history . "\n" . $userContext . "\nUser: " . $input . "\nAssistant (please respond in a structured and organized manner):";
-    
+
+        $qa = new QuestionAnswering($vectorStore, $embeddingGenerator, $chat);
+        $qa->systemMessageTemplate = $systemMessage;
+
         $message = new Message();
         $message->content = $fullPrompt;
         $message->role = ChatRole::User;
-    
+
         try {
             $stream = $qa->answerQuestionFromChat([$message]);
             if ($stream instanceof \Psr\Http\Message\StreamInterface) {
@@ -160,10 +218,9 @@ class CoachChat extends Component
             Log::error('Error processing chat completion', ['error' => $e->getMessage()]);
             return 'Sorry, something went wrong while processing your request.';
         }
-    
+
         return 'Sorry, I could not process your request.';
     }
-    
 
     private function getUserContext()
     {
@@ -186,20 +243,34 @@ class CoachChat extends Component
         return $context;
     }
 
-    private function saveConversation($userMessage, $aiResponse)
+    public function startNewChat()
     {
-        // Save the conversation to the database
-        ConversationHistory::create([
-            'user_id' => Auth::id(),
-            'coach_type' => $this->coachType,
-            'user_message' => $userMessage,
-            'ai_response' => $aiResponse,
-            'created_at' => now(),
-        ]);
+        // **Delete previous conversations**
+        ConversationHistory::where('user_id', Auth::id())->delete();
+
+        // **Clear current messages and add welcome message**
+        $this->messages = [];
+
+        $welcomeMessage = $this->getWelcomeMessage();
+
+        $this->messages[] = [
+            'role' => 'assistant',
+            'content' => $welcomeMessage,
+            'type' => 'ai',
+        ];
     }
 
     public function render()
     {
-        return view('livewire.chat.coach-chat');
+        // Fetch coach info for avatar display
+        $coach = Auth::user()->coach;
+
+        // Get user's gender
+        $userGender = ucfirst(Auth::user()->gender ?? 'User');
+
+        return view('livewire.chat.coach-chat', [
+            'coach' => $coach,
+            'userGender' => $userGender,
+        ]);
     }
 }

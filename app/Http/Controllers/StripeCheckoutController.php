@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Session;
 
 class StripeCheckoutController extends Controller
 {
-
     public function checkout(Request $request)
     {
         $planKey = $request->query('plan');
@@ -45,11 +44,15 @@ class StripeCheckoutController extends Controller
         // Store selected plan in session
         Session::put('selected_plan', $planKey);
 
-        // Retrieve email from session
-        $email = Session::get('pending_email');
+        if (Auth::check()) {
+            $email = Auth::user()->email;
+        } else {
+            // Retrieve email from session
+            $email = Session::get('pending_email');
 
-        if (!$email) {
-            return redirect()->route('coach.generated')->with('error', 'Email not provided.');
+            if (!$email) {
+                return redirect()->route('coach.generated')->with('error', 'Email not provided.');
+            }
         }
 
         // Create Stripe Checkout Session
@@ -87,64 +90,111 @@ class StripeCheckoutController extends Controller
             'expand' => ['subscription'],
         ]);
 
-        // Get customer email from metadata
-        $email = $session->metadata->email ?? Session::get('pending_email');
+        if (Auth::check()) {
+            // Handle authenticated users
+            $user = Auth::user();
+            $planKey = $session->metadata->plan;
 
-        if (!$email) {
-            return redirect()->route('coach.generated')->with('error', 'Email not provided.');
+            // Set the Stripe customer ID if not already set
+            if (!$user->stripe_id) {
+                $user->stripe_id = $session->customer;
+                $user->save();
+            }
+
+            // Retrieve the subscription from the session
+            $stripeSubscription = $session->subscription;
+
+            if (!$stripeSubscription) {
+                return redirect()->route('checkout')->with('error', 'Subscription not found.');
+            }
+
+            // Create the subscription in your database
+            $user->subscriptions()->create([
+                'name' => $planKey,
+                'type'  => 'subscription',
+                'stripe_id' => $stripeSubscription->id,
+                'stripe_status' => $stripeSubscription->status,
+                'stripe_price' => $stripeSubscription->items->data[0]->price->id,
+                'quantity' => $stripeSubscription->quantity,
+                'ends_at' => $stripeSubscription->cancel_at ? Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
+            ]);
+
+            // Clear session data that isn't needed anymore
+            Session::forget('selected_plan');
+
+            // Redirect to dashboard
+            return redirect()->route('dashboard')->with('success', 'Subscription successful! Welcome back.');
+        } else {
+            // Handle guest users
+            // Get customer email from metadata
+            $email = $session->metadata->email ?? Session::get('pending_email');
+
+            if (!$email) {
+                return redirect()->route('coach.generated')->with('error', 'Email not provided.');
+            }
+
+            // Retrieve 'selectedOptions', 'selectedCoachId', and 'gender' from the session before setting up password
+            $selectedOptions = Session::get('selectedOptions');
+            $selectedCoachId = Session::get('selectedCoachId');
+            $gender = Session::get('gender');
+
+            // Find or create the user
+            $user = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => 'User', // You may want to collect the name during email submission
+                    'password' => Hash::make(Str::random(16)), // Temporary password; user will set it later
+                    'gender' => $gender,
+                ]
+            );
+
+            // Set the Stripe customer ID
+            $user->stripe_id = $session->customer;
+            $user->save();
+
+            // Assign the selected coach
+            if ($selectedCoachId) {
+                $user->coach_id = $selectedCoachId;
+                $user->save();
+            }
+
+            // Retrieve the subscription from the session
+            $stripeSubscription = $session->subscription;
+
+            if (!$stripeSubscription) {
+                return redirect()->route('checkout')->with('error', 'Subscription not found.');
+            }
+
+            // Create the subscription in your database
+            $user->subscriptions()->create([
+                'name' => $session->metadata->plan,
+                'type'  => 'subscription',
+                'stripe_id' => $stripeSubscription->id,
+                'stripe_status' => $stripeSubscription->status,
+                'stripe_price' => $stripeSubscription->items->data[0]->price->id,
+                'quantity' => $stripeSubscription->quantity,
+                'ends_at' => $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
+            ]);
+
+            // Clear session data that isn't needed anymore
+            Session::forget(['pending_email', 'selected_plan', 'selectedCoachId']);
+
+            // **Do not log the user in yet**
+            // Auth::login($user);
+
+            // Store user ID in session for password setup
+            Session::put('setup_user_id', $user->id);
+
+            // Restore 'selectedOptions' and 'gender' to the session after
+            Session::put('selectedOptions', $selectedOptions);
+            Session::put('gender', $gender);
+
+            // Redirect to password setup
+            return redirect()->route('password.setup')->with(['email' => $email, 'plan' => $session->metadata->plan]);
         }
 
-        // Retrieve 'selectedOptions' and 'gender' from the session before logging in
-        $selectedOptions = Session::get('selectedOptions');
-        $gender = Session::get('gender');
-
-        // Find or create the user
-        $user = User::firstOrCreate(
-            ['email' => $email],
-            [
-                'name' => 'User', // You may want to collect the name during email submission
-                'password' => Hash::make(Str::random(16)), // Temporary password; user will set it later
-                'gender' => $gender,
-            ]
-        );
-
-        // Set the Stripe customer ID
-        $user->stripe_id = $session->customer;
-        $user->save();
-
-        // Retrieve the subscription from the session
-        $stripeSubscription = $session->subscription;
-
-        if (!$stripeSubscription) {
-            return redirect()->route('checkout')->with('error', 'Subscription not found.');
-        }
-
-        // Create the subscription in your database
-        $user->subscriptions()->create([
-            'name' => $session->metadata->plan,
-            'type'  => 'subscription',
-            'stripe_id' => $stripeSubscription->id,
-            'stripe_status' => $stripeSubscription->status,
-            'stripe_price' => $stripeSubscription->items->data[0]->price->id,
-            'quantity' => $stripeSubscription->quantity,
-            'ends_at' => $stripeSubscription->cancel_at ? \Carbon\Carbon::createFromTimestamp($stripeSubscription->cancel_at) : null,
-        ]);
-
-        // Clear session data that isn't needed anymore
-        Session::forget('pending_email');
-        Session::forget('selected_plan');
-
-        // Log the user in
-        Auth::login($user);
-
-        // Restore 'selectedOptions' and 'gender' to the session after logging in
-        Session::put('selectedOptions', $selectedOptions);
-        Session::put('gender', $gender);
-
-        // Redirect to password setup
-        return redirect()->route('password.setup')->with(['email' => $email, 'plan' => $session->metadata->plan]);
     }
-
+    
     public function cancel()
     {
         return redirect()->route('coach.generated')->with('error', 'Payment was canceled.');

@@ -17,6 +17,11 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// **Define the 'home' route**
+Route::get('/home', function () {
+    return redirect()->route('dashboard');
+})->name('home');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
@@ -38,7 +43,6 @@ Route::middleware([
         Route::get('questionnaires', QuestionnairesIndex::class)->name('admin.questionnaires.index');
     });
     // End Admin routes ------------------------------------------------
-    
 });
 
 
