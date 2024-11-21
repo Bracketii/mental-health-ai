@@ -64,9 +64,9 @@ Route::middleware([
             // Path to the log file
             $path = storage_path('logs/laravel.log');
         
-            // Check if the file exists
+            // Check if the file exists, if not, create it
             if (!File::exists($path)) {
-                abort(404, 'Log file not found.');
+                File::put($path, "Log file created on " . now()->toDateTimeString() . "\n");
             }
         
             // Get the content of the log file
