@@ -27,7 +27,7 @@ class Index extends Component
         'name' => 'required|string|max:255',
         'designation' => 'required|string|max:255',
         'bio' => 'nullable|string|max:1000', // Validation for bio
-        'avatar' => 'nullable|image|max:10240', // Max 1MB
+        'avatar' => 'nullable|mimes:jpg,jpeg,png',
     ];
 
     public function render()
