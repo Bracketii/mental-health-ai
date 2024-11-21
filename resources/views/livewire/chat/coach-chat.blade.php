@@ -7,7 +7,7 @@
             @if($message['role'] === 'assistant')
                 <div class="flex">
                     @if($coach && $coach->avatar)
-                        <img src="{{ asset($coach->avatar) }}" alt="{{ $coach->name }}" class="h-10 w-10 rounded-full object-cover">
+                        <img src="{{ asset('storage/' . $coach->avatar) }}" alt="{{ $coach->name }}" class="h-10 w-10 rounded-full object-cover">
                     @else
                         <x-application-logo class="h-10 w-10 rounded-full" />
                     @endif
