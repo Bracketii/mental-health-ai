@@ -6,6 +6,7 @@ use App\Livewire\Admin\Users\Index;
 use App\Livewire\Admin\Users\Create;
 use App\Livewire\Auth\PasswordSetup;
 use App\Livewire\Auth\QuestionsFlow;
+use Illuminate\Support\Facades\File;
 use App\Livewire\Auth\CoachGenerated;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\RegistrationFlow;
@@ -57,6 +58,24 @@ Route::middleware([
         Route::get('conversation-monitor', ConversationMonitorIndex::class)->name('admin.conversation-monitor');
 
         Route::get('subscriptions-monitor', SubscriptionMonitorIndex::class)->name('admin.subscriptions-monitor');
+
+        // Logs
+        Route::get('/logs', function () {
+            // Path to the log file
+            $path = storage_path('logs/laravel.log');
+        
+            // Check if the file exists
+            if (!File::exists($path)) {
+                abort(404, 'Log file not found.');
+            }
+        
+            // Get the content of the log file
+            $logContent = File::get($path);
+        
+            // Display the content in a readable format
+            return response("<pre>{$logContent}</pre>", 200)
+                        ->header('Content-Type', 'text/html');
+        });
     });
     // End Admin routes ------------------------------------------------
 });
