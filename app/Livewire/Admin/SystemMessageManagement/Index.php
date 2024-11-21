@@ -66,7 +66,7 @@ class Index extends Component
         $this->showModal = true;
 
         // Update validation rule to ignore the current message's type
-        $this->rules['type'] = 'required|string|max:50|unique:system_messages,type,' . $message->id;
+        $this->rules['type'] = 'required|string|max:50' . $message->id;
     }
 
     public function updateMessage()
