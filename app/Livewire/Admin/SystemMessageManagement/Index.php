@@ -19,10 +19,13 @@ class Index extends Component
     public $confirmingMessageDeletion = false;
     public $messageToDelete;
 
-    protected $rules = [
-        'type' => 'required|string|max:50|unique:system_messages,type',
-        'content' => 'required|string',
-    ];
+    protected function rules()
+    {
+        return [
+            'type' => 'required|string|max:50|unique:system_messages,type,' . ($this->messageToEdit->id ?? 'NULL'),
+            'content' => 'required|string',
+        ];
+    }
 
     protected $messages = [
         'type.unique' => 'The message type must be unique.',
@@ -64,9 +67,6 @@ class Index extends Component
         $this->content = $message->content;
         $this->editing = true;
         $this->showModal = true;
-
-        // Update validation rule to ignore the current message's type
-        $this->rules['type'] = 'required|string|max:50' . $message->id;
     }
 
     public function updateMessage()
@@ -103,7 +103,5 @@ class Index extends Component
     {
         $this->reset(['type', 'content', 'messageToEdit', 'editing', 'showModal']);
         $this->resetValidation();
-        // Reset validation rules to default
-        $this->rules['type'] = 'required|string|max:50|unique:system_messages,type';
     }
 }
