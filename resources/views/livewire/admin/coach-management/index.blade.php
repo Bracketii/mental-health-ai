@@ -75,17 +75,17 @@
                         </x-input-group>
                         <x-input-group>
                             <x-label for="avatar" value="Avatar" />
-                            <input type="file" wire:model="avatar" id="avatar" class="block w-full text-sm text-gray-500
+                            <input type="file" id="avatar" class="block w-full text-sm text-gray-500
                             file:mr-4 file:py-2 file:px-4
                             file:rounded-full file:border-0
                             file:text-sm file:font-semibold
                             file:bg-blue-50 file:text-blue-700
-                            hover:file:bg-blue-100
-                        ">
-                            <x-input-error for="avatar" />
+                            hover:file:bg-blue-100"
+                                onchange="uploadAvatar(this)" />
+                            <x-input-error for="uploadedAvatarPath" />
                             <div class="mt-2">
-                                @if ($avatar)
-                                    <img src="{{ $avatar->temporaryUrl() }}" alt="Preview" class="w-16 h-16 rounded-full object-cover">
+                                @if ($uploadedAvatarPath)
+                                    <img src="{{ asset('storage/' . $uploadedAvatarPath) }}" alt="Avatar Preview" class="w-16 h-16 rounded-full object-cover">
                                 @endif
                             </div>
                         </x-input-group>
@@ -102,4 +102,30 @@
             </div>
         </x-modal>
     @endif
+    <script>
+        function uploadAvatar(input) {
+            const formData = new FormData();
+            formData.append('avatar', input.files[0]);
+    
+            fetch('{{ route('upload.avatar') }}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                },
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.path) {
+                    @this.set('uploadedAvatarPath', data.path);
+                } else {
+                    alert(data.error || 'Failed to upload avatar.');
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading avatar:', error);
+                alert('Error uploading avatar.');
+            });
+        }
+    </script>
 </div>

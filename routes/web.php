@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\File;
 use App\Livewire\Auth\CoachGenerated;
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Auth\RegistrationFlow;
+use App\Http\Controllers\GeneralActions;
 use App\Http\Controllers\StripeWebhookController;
 use App\Http\Controllers\StripeCheckoutController;
 use App\Livewire\Admin\CoachManagement\Index as CoachIndex;
@@ -58,6 +59,8 @@ Route::middleware([
         Route::get('conversation-monitor', ConversationMonitorIndex::class)->name('admin.conversation-monitor');
 
         Route::get('subscriptions-monitor', SubscriptionMonitorIndex::class)->name('admin.subscriptions-monitor');
+
+        Route::post('/upload-avatar', [GeneralActions::class, 'upload'])->name('upload.avatar');
 
         // Logs
         Route::get('/logs', function () {

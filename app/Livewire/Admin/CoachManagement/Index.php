@@ -5,16 +5,15 @@ namespace App\Livewire\Admin\CoachManagement;
 use App\Models\Coach;
 use Livewire\Component;
 use Livewire\WithPagination;
-use Livewire\WithFileUploads;
 use Illuminate\Support\Facades\Storage;
 
 class Index extends Component
 {
-    use WithPagination, WithFileUploads;
+    use WithPagination;
 
     public $name;
     public $designation;
-    public $avatar;
+    public $uploadedAvatarPath; // Holds the uploaded avatar path
     public $bio;
     public $coachToEdit;
     public $editing = false;
@@ -27,7 +26,7 @@ class Index extends Component
         'name' => 'required|string|max:255',
         'designation' => 'required|string|max:255',
         'bio' => 'nullable|string|max:1000',
-        'avatar' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:10240', // Max 10MB
+        'uploadedAvatarPath' => 'nullable|string', // Validate as a string path
     ];
 
     public function render()
@@ -50,22 +49,16 @@ class Index extends Component
         $this->validate();
 
         try {
-            // Handle avatar upload if exists
-            $avatarPath = null;
-            if ($this->avatar) {
-                $avatarPath = $this->avatar->store('avatars', 'public');
-            }
-
             Coach::create([
                 'name' => $this->name,
                 'designation' => $this->designation,
                 'bio' => $this->bio,
-                'avatar' => $avatarPath,
+                'avatar' => $this->uploadedAvatarPath, // Use the uploaded avatar path
             ]);
 
             session()->flash('message', 'Coach added successfully.');
         } catch (\Exception $e) {
-            session()->flash('error', 'Avatar upload failed: ' . $e->getMessage());
+            session()->flash('error', 'Failed to add coach: ' . $e->getMessage());
         }
 
         $this->resetForm();
@@ -78,7 +71,7 @@ class Index extends Component
         $this->name = $coach->name;
         $this->designation = $coach->designation;
         $this->bio = $coach->bio;
-        $this->avatar = null;
+        $this->uploadedAvatarPath = $coach->avatar;
         $this->editing = true;
         $this->showModal = true;
     }
@@ -90,20 +83,17 @@ class Index extends Component
         try {
             $coach = $this->coachToEdit;
 
-            // Handle avatar upload if exists
-            if ($this->avatar) {
-                // Delete old avatar if exists
-                if ($coach->avatar) {
-                    Storage::disk('public')->delete($coach->avatar);
-                }
-                $avatarPath = $this->avatar->store('avatars', 'public');
-                $coach->avatar = $avatarPath;
+            if ($this->uploadedAvatarPath !== $coach->avatar && $coach->avatar) {
+                // Delete the old avatar
+                Storage::disk('public')->delete($coach->avatar);
             }
 
-            $coach->name = $this->name;
-            $coach->designation = $this->designation;
-            $coach->bio = $this->bio;
-            $coach->save();
+            $coach->update([
+                'name' => $this->name,
+                'designation' => $this->designation,
+                'bio' => $this->bio,
+                'avatar' => $this->uploadedAvatarPath,
+            ]);
 
             session()->flash('message', 'Coach updated successfully.');
         } catch (\Exception $e) {
@@ -114,35 +104,9 @@ class Index extends Component
         $this->showModal = false;
     }
 
-    public function confirmCoachDeletion($id)
-    {
-        $this->coachToDelete = Coach::findOrFail($id);
-        $this->confirmingCoachDeletion = true;
-    }
-
-    public function deleteCoach()
-    {
-        try {
-            $coach = $this->coachToDelete;
-
-            // Delete avatar if exists
-            if ($coach->avatar) {
-                Storage::disk('public')->delete($coach->avatar);
-            }
-
-            $coach->delete();
-            session()->flash('message', 'Coach deleted successfully.');
-        } catch (\Exception $e) {
-            session()->flash('error', 'Deletion failed: ' . $e->getMessage());
-        }
-
-        $this->confirmingCoachDeletion = false;
-        $this->coachToDelete = null;
-    }
-
     public function resetForm()
     {
-        $this->reset(['name', 'designation', 'avatar', 'bio', 'coachToEdit', 'editing']);
+        $this->reset(['name', 'designation', 'uploadedAvatarPath', 'bio', 'coachToEdit', 'editing']);
         $this->resetValidation();
     }
 }
