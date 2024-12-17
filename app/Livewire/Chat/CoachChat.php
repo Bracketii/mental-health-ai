@@ -6,15 +6,17 @@ use Livewire\Component;
 use LLPhant\Chat\Message;
 use LLPhant\OpenAIConfig;
 use App\Models\UserAnswer;
-use App\Models\SystemMessage; // Import SystemMessage model
 use LLPhant\Chat\OpenAIChat;
 use LLPhant\Chat\Enums\ChatRole;
 use App\Models\ConversationHistory;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use LLPhant\Embeddings\DataReader\FileDataReader;
 use LLPhant\Query\SemanticSearch\QuestionAnswering;
 use LLPhant\Embeddings\DocumentSplitter\DocumentSplitter;
+use App\Models\SystemMessage; // Import SystemMessage model
 use LLPhant\Embeddings\EmbeddingFormatter\EmbeddingFormatter;
 use LLPhant\Embeddings\VectorStores\FileSystem\FileSystemVectorStore;
 use LLPhant\Embeddings\EmbeddingGenerator\OpenAI\OpenAIADA002EmbeddingGenerator;
@@ -90,7 +92,7 @@ class CoachChat extends Component
 
         // Check if the user is paid
         if (!$user->hasActiveSubscription()) {
-            $this->dispatchBrowserEvent('not-paid');
+            $this->dispatch('not-paid');
             return;
         }
 
@@ -199,8 +201,8 @@ class CoachChat extends Component
         $config->model = 'gpt-4o-mini';
 
         $config->modelOptions = [
-            'presence_penalty' => 0.6, // Encourage new topics
-            'frequency_penalty' => 0.3, // Reduce repetition
+            'presence_penalty' => 0.3, // Encourage new topics
+            'frequency_penalty' => 0.5, // Reduce repetition
         ];
 
         $chat = new OpenAIChat($config);
@@ -283,6 +285,45 @@ class CoachChat extends Component
         $this->mount();
     }
 
+    public function generateAudio($text)
+    {
+        $apiKey = config('services.openai.api_key'); // Get the API key from env
+    
+        $response = Http::withHeaders([
+            'Authorization' => "Bearer {$apiKey}",
+        ])->post('https://api.openai.com/v1/audio/speech', [
+            'model' => 'tts-1', // TTS model
+            'voice' => 'alloy', // Voice options: alloy, echo, fable, etc.
+            'input' => $text,
+        ]);
+    
+        if ($response->successful()) {
+            // Save the audio in the correct directory: storage/app/public/audios
+            $audioFileName = 'audio_' . time() . '.mp3';
+            $audioPath = "audios/{$audioFileName}";
+    
+            Storage::put($audioPath, $response->body());
+    
+            // Generate and return the correct accessible URL
+            return asset("storage/audios/{$audioFileName}");
+        }
+    
+        return null;
+    }
+    
+    public function playAudio($text)
+    {
+        $audioUrl = $this->generateAudio($text);
+    
+        // Directly return the audio URL to Livewire
+        if ($audioUrl) {
+            return $audioUrl;
+        }
+    
+        return null;
+    }    
+    
+    
     public function render()
     {
         // Fetch coach info for avatar display

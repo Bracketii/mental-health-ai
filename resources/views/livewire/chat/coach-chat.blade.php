@@ -5,18 +5,43 @@
     <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
         @foreach($messages as $message)
             @if($message['role'] === 'assistant')
-                <div class="flex">
+                <div class="flex items-center">
                     @if($coach && $coach->avatar)
                         <img src="{{ asset('storage/' . $coach->avatar) }}" alt="{{ $coach->name }}" class="h-10 w-10 rounded-full object-cover">
                     @else
                         <x-application-logo class="h-10 w-10 rounded-full" />
                     @endif
+                    <!-- AI Response -->
                     <div class="ml-3 bg-gray-200 dark:bg-gray-700 rounded-lg px-4 py-2 max-w-xl break-words">
                         @markdown($message['content'])
                     </div>
+                                   
+                </div>
+                <!-- Actions (Icons) Below Response -->
+                <div class="flex items-center space-x-4 mt-2 ml-14">
+                    <!-- Voice Icon for TTS -->
+                    <button 
+                        x-data 
+                        @click="$wire.playAudio({{ json_encode($message['content']) }}).then(url => {
+                            if (url) {
+                                const audio = new Audio(url);
+                                audio.play()
+                                    .then(() => console.log('Audio playing successfully'))
+                                    .catch(error => {
+                                        console.error('Audio Playback Error:', error);
+                                        alert('Please click again to allow playback.');
+                                    });
+                            }
+                        })" 
+                        title="Play Response"
+                        class="text-gray-500 hover:text-blue-500"
+                    >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" class="w-6 h-6" fill="currentColor"><path d="M16 21c3.527-1.547 5.999-4.909 5.999-9S19.527 4.547 16 3v2c2.387 1.386 3.999 4.047 3.999 7S18.387 17.614 16 19v2z"></path><path d="M16 7v10c1.225-1.1 2-3.229 2-5s-.775-3.9-2-5zM4 17h2.697l5.748 3.832a1.004 1.004 0 0 0 1.027.05A1 1 0 0 0 14 20V4a1 1 0 0 0-1.554-.832L6.697 7H4c-1.103 0-2 .897-2 2v6c0 1.103.897 2 2 2zm0-8h3c.033 0 .061-.016.093-.019a1.027 1.027 0 0 0 .38-.116c.026-.015.057-.017.082-.033L12 5.868v12.264l-4.445-2.964c-.025-.017-.056-.02-.082-.033a.986.986 0 0 0-.382-.116C7.059 15.016 7.032 15 7 15H4V9z"></path></svg>
+                    </button>
                 </div>
             @else
                 <div class="flex justify-end">
+                    <!-- User Response -->
                     <div class="mr-3 bg-ap4 text-white rounded-lg px-4 py-2 max-w-xl break-words">
                         <p>{{ $message['content'] }}</p>
                     </div>
@@ -36,17 +61,6 @@
 
     <!-- Chat Input -->
     <div class="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-        <x-action-message on="not-paid" class="mb-4 text-red-600 text-xl text-center">
-            <div>
-                {{ __('You have to subscribe to proceed') }}
-            </div>
-            <div class="mt-2">
-                <a href="/" class="inline-block px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition">
-                    Subscribe Now
-                </a>
-            </div>
-        </x-action-message>
-        
         <div class="flex items-center">
             <x-input
                 wire:model.defer="inputMessage"
@@ -61,11 +75,11 @@
                 </svg>
             </x-button>
             <x-button title="New Chat" wire:click="startNewChat" class="ml-2 bg-gray-400 hover:bg-ap6" style="padding: 10px">
-                <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 2H8C4.691 2 2 4.691 2 8v13a1 1 0 0 0 1 1h13c3.309 0 6-2.691 6-6V8c0-3.309-2.691-6-6-6zm4 14c0 2.206-1.794 4-4 4H4V8c0-2.206 1.794-4 4-4h8c2.206 0 4 1.794 4 4v8z"></path><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path></svg>
+                <svg class="h-5 w-5 text-white" fill="currentColor" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M16 2H8C4.691 2 2 4.691 2 8v13a1 1 0 0 0 1 1h13c3.309 0 6-2.691 6-6V8c0-3.309-2.691-6-6-6zm4 14c0 2.206-1.794 4-4 4H4V8c0-2.206 1.794 4 4-4h8c2.206 0 4 1.794 4 4v8z"></path><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h-4z"></path></svg>
             </x-button>
         </div>
-
-        <!-- Validation Errors -->
-        <x-validation-errors class="mt-2" />
     </div>
 </div>
+
+
+
